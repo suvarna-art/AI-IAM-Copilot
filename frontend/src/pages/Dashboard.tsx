@@ -1,6 +1,8 @@
 import Header from "../components/Header";
 import Sidebar from "../components/Sidebar";
 import StatCard from "../components/StatCard";
+import AIInsights from "../components/AIInsights";
+import ActivityTable from "../components/ActivityTable";
 
 import {
   ShieldCheck,
@@ -61,6 +63,16 @@ export default function Dashboard() {
               positive={true}
               icon={ClipboardCheck}
             />
+
+          </div>
+
+          <div className="mt-8 grid grid-cols-1 xl:grid-cols-3 gap-6">
+
+            <div className="xl:col-span-2">
+              <ActivityTable />
+            </div>
+
+              <AIInsights />
 
           </div>
 
