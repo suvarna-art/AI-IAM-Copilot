@@ -1,8 +1,13 @@
-import Header from "../components/Header";
 import Sidebar from "../components/Sidebar";
+import Header from "../components/Header";
+
 import StatCard from "../components/StatCard";
-import AIInsights from "../components/AIInsights";
 import ActivityTable from "../components/ActivityTable";
+import AIInsights from "../components/AIInsights";
+import IdentityAnalytics from "../components/IdentityAnalytics";
+import SystemStatus from "../components/SystemStatus";
+import WelcomeBanner from "../components/WelcomeBanner";
+import SecurityGauge from "../components/SecurityGauge";
 
 import {
   ShieldCheck,
@@ -13,24 +18,71 @@ import {
 
 export default function Dashboard() {
   return (
-    <div className="flex min-h-screen bg-slate-950">
+    <div className="relative flex min-h-screen overflow-hidden bg-slate-950">
+      {/* Decorative Background */}
+
+<div className="absolute inset-0 overflow-hidden pointer-events-none">
+
+  <div
+    className="
+      absolute
+      -left-40
+      -top-40
+      h-96
+      w-96
+      rounded-full
+      bg-cyan-500/10
+      blur-[140px]
+    "
+  />
+
+  <div
+    className="
+      absolute
+      right-0
+      top-40
+      h-80
+      w-80
+      rounded-full
+      bg-blue-600/10
+      blur-[120px]
+    "
+  />
+
+  <div
+    className="
+      absolute
+      bottom-0
+      left-1/2
+      h-72
+      w-72
+      rounded-full
+      bg-indigo-500/10
+      blur-[120px]
+    "
+  />
+
+</div>
+
       <Sidebar />
 
-      <div className="flex-1 flex flex-col">
+      <div className="flex flex-1 flex-col">
 
         <Header />
 
-        <main className="flex-1 p-8">
+        <main className="flex-1 p-8 space-y-8">
 
-          <h1 className="text-4xl font-bold text-white">
-            Welcome back 👋
-          </h1>
+          {/* Hero */}
 
-          <p className="mt-2 text-slate-400">
-            Monitor identities, detect risks, and automate access governance with AI.
-          </p>
+            <section>
 
-          <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
+              <WelcomeBanner />
+
+            </section>
+
+          {/* KPI Cards */}
+
+          <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
 
             <StatCard
               title="Security Score"
@@ -64,21 +116,47 @@ export default function Dashboard() {
               icon={ClipboardCheck}
             />
 
-          </div>
+          </section>
 
-          <div className="mt-8 grid grid-cols-1 xl:grid-cols-3 gap-6">
+          {/* Analytics + AI */}
 
-            <div className="xl:col-span-2">
-              <ActivityTable />
-            </div>
+          <section className="grid gap-6 xl:grid-cols-3">
+
+            <div className="xl:col-span-2 space-y-6">
+
+    <SecurityGauge score={94} />
+
+    <IdentityAnalytics />
+
+    <ActivityTable />
+
+</div>
+            <div>
+
+              <div className="space-y-6">
 
               <AIInsights />
 
-          </div>
+              <SystemStatus />
+
+            </div>
+
+            </div>
+
+          </section>
+
+          {/* Activity */}
+
+          <section>
+
+            <ActivityTable />
+
+          </section>
 
         </main>
 
       </div>
+
     </div>
   );
 }

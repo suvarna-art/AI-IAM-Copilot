@@ -1,49 +1,139 @@
-import { Sparkles, ShieldAlert, CheckCircle2 } from "lucide-react";
+import { motion } from "framer-motion";
+import {
+  Bot,
+  Sparkles,
+  ShieldAlert,
+  ArrowRight,
+  BrainCircuit,
+} from "lucide-react";
+
+const insights = [
+  {
+    icon: ShieldAlert,
+    title: "Dormant Privileged Account",
+    description: "Admin account inactive for 91 days.",
+    color: "text-red-400",
+  },
+  {
+    icon: Sparkles,
+    title: "Role Optimization",
+    description: "AI recommends merging 4 duplicate roles.",
+    color: "text-cyan-400",
+  },
+  {
+    icon: BrainCircuit,
+    title: "Risk Prediction",
+    description: "Predicted insider risk increased by 12%.",
+    color: "text-yellow-400",
+  },
+];
 
 export default function AIInsights() {
   return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6 h-full">
-
+    <motion.div
+      initial={{ opacity: 0, x: 30 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.6 }}
+      className="rounded-3xl border border-slate-800 bg-slate-900/80 backdrop-blur-xl p-6 h-full"
+    >
       <div className="flex items-center gap-3 mb-6">
-        <Sparkles className="text-cyan-400" />
-        <h2 className="text-xl font-semibold text-white">
-          AI Security Insights
+
+        <div className="rounded-2xl bg-cyan-500/10 p-3">
+          <Bot
+            size={28}
+            className="text-cyan-400"
+          />
+        </div>
+
+        <div>
+
+          <h2 className="text-xl font-bold text-white">
+            IdentityForge AI
+          </h2>
+
+          <p className="text-sm text-green-400">
+            ● Online
+          </p>
+
+        </div>
+
+      </div>
+
+      <div className="rounded-2xl bg-slate-950 border border-slate-800 p-5 mb-6">
+
+        <p className="text-sm text-slate-400">
+          AI Confidence
+        </p>
+
+        <h2 className="text-4xl font-bold text-cyan-400 mt-2">
+          97%
         </h2>
-      </div>
 
-      <div className="space-y-5">
+        <div className="mt-4 h-2 rounded-full bg-slate-800 overflow-hidden">
 
-        <div className="rounded-xl bg-red-500/10 border border-red-500/20 p-4">
-          <div className="flex items-center gap-3">
-            <ShieldAlert className="text-red-400" />
-            <div>
-              <p className="text-white font-medium">
-                High Risk Accounts
-              </p>
-              <p className="text-slate-400 text-sm">
-                3 privileged users have unusual login activity.
-              </p>
-            </div>
-          </div>
-        </div>
+          <motion.div
+            initial={{ width: 0 }}
+            animate={{ width: "97%" }}
+            transition={{ duration: 1.5 }}
+            className="h-full bg-cyan-400"
+          />
 
-        <div className="rounded-xl bg-green-500/10 border border-green-500/20 p-4">
-          <div className="flex items-center gap-3">
-            <CheckCircle2 className="text-green-400" />
-            <div>
-              <p className="text-white font-medium">
-                AI Recommendation
-              </p>
-
-              <p className="text-slate-400 text-sm">
-                Review dormant administrator accounts older than 90 days.
-              </p>
-            </div>
-          </div>
         </div>
 
       </div>
 
-    </div>
+      <div className="space-y-4">
+
+        {insights.map(({ icon: Icon, title, description, color }) => (
+          <motion.div
+            whileHover={{
+              scale:1.02,
+              y:-3
+            }}
+            key={title}
+            className="rounded-2xl border border-slate-800 bg-slate-950/60 p-4"
+          >
+            <div className="flex gap-3">
+
+              <Icon
+                className={color}
+                size={22}
+              />
+
+              <div>
+
+                <h3 className="font-semibold text-white">
+                  {title}
+                </h3>
+
+                <p className="text-sm text-slate-400 mt-1">
+                  {description}
+                </p>
+
+              </div>
+
+            </div>
+
+          </motion.div>
+        ))}
+
+      </div>
+
+      <motion.button
+        whileHover={{
+          scale: 1.03,
+        }}
+        whileTap={{
+          scale: 0.97,
+        }}
+        className="mt-8 w-full rounded-2xl bg-cyan-500 py-4 text-white font-semibold flex items-center justify-center gap-2 hover:bg-cyan-400 transition"
+      >
+        Ask IdentityForge AI
+
+        <ArrowRight size={18} />
+
+      </motion.button>
+
+    </motion.div>
   );
 }

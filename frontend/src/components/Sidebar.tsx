@@ -20,7 +20,7 @@ const menu = [
 
 export default function Sidebar() {
   return (
-    <aside className="w-72 bg-slate-950 border-r border-slate-800 flex flex-col">
+    <aside className="w-72 bg-slate-950/80 backdrop-blur-xl border-r border-slate-800 flex flex-col">
 
       <div className="px-8 py-8 border-b border-slate-800">
         <h1 className="text-2xl font-bold text-cyan-400">
