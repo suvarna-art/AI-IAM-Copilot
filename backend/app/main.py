@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from app.routers.dashboard import router as dashboard_router
 from fastapi.middleware.cors import CORSMiddleware
+from app.routers.activities import router as activities_router
 
 app = FastAPI(
     title="IdentityForge AI - AI-IAM Copilot",
@@ -19,7 +20,7 @@ app.add_middleware(
 )
 
 app.include_router(dashboard_router)
-
+app.include_router(activities_router)
 
 @app.get("/")
 def root():

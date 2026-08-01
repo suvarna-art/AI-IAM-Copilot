@@ -18,7 +18,8 @@ import {
 
 import { useEffect, useState } from "react";
 import { getDashboardData } from "../services/dashboard";
-import type { DashboardData } from "../types/dashboard";
+import type { Activity, DashboardData } from "../types/dashboard";
+import { getActivities } from "../services/activity";
 
 export default function Dashboard() {
   const [dashboardData, setDashboardData] =
@@ -27,12 +28,16 @@ export default function Dashboard() {
 const [loading, setLoading] = useState(true);
 
 const [error, setError] = useState("");
+const [activities, setActivities] = useState<Activity[]>([]);
+
 useEffect(() => {
   async function loadDashboard() {
     try {
       const data = await getDashboardData();
+      const activityData = await getActivities();
 
       setDashboardData(data);
+      setActivities(activityData);
     } catch (err) {
       setError("Unable to load dashboard.");
       console.error(err);
@@ -43,6 +48,7 @@ useEffect(() => {
 
   loadDashboard();
 }, []);
+
 if (loading) {
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-950 text-white">
@@ -182,6 +188,8 @@ if (error) {
 
     <IdentityAnalytics />
 
+      {/* Activity */}
+
     <ActivityTable />
 
 </div>
@@ -196,14 +204,6 @@ if (error) {
             </div>
 
             </div>
-
-          </section>
-
-          {/* Activity */}
-
-          <section>
-
-            <ActivityTable />
 
           </section>
 
