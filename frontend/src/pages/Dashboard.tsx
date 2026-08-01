@@ -16,8 +16,50 @@ import {
   ClipboardCheck,
 } from "lucide-react";
 
+import { useEffect, useState } from "react";
+import { getDashboardData } from "../services/dashboard";
+import type { DashboardData } from "../types/dashboard";
+
 export default function Dashboard() {
+  const [dashboardData, setDashboardData] =
+  useState<DashboardData | null>(null);
+
+const [loading, setLoading] = useState(true);
+
+const [error, setError] = useState("");
+useEffect(() => {
+  async function loadDashboard() {
+    try {
+      const data = await getDashboardData();
+
+      setDashboardData(data);
+    } catch (err) {
+      setError("Unable to load dashboard.");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  loadDashboard();
+}, []);
+if (loading) {
   return (
+    <div className="min-h-screen flex items-center justify-center bg-slate-950 text-white">
+      Loading Dashboard...
+    </div>
+  );
+}
+
+if (error) {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-slate-950 text-red-500">
+      {error}
+    </div>
+  );
+}
+
+    return (
     <div className="relative flex min-h-screen overflow-hidden bg-slate-950">
       {/* Decorative Background */}
 
@@ -86,7 +128,10 @@ export default function Dashboard() {
 
             <StatCard
               title="Security Score"
-              value="94%"
+              value={dashboardData
+                    ? `${dashboardData.securityScore}%`
+                    : "--"
+                    }
               change="+2.1%"
               positive={true}
               icon={ShieldCheck}
@@ -94,7 +139,10 @@ export default function Dashboard() {
 
             <StatCard
               title="Active Identities"
-              value="12,486"
+              value={dashboardData
+                      ? dashboardData.activeIdentities.toLocaleString()
+                      : "--"
+                    }
               change="+318"
               positive={true}
               icon={Users}
@@ -102,7 +150,10 @@ export default function Dashboard() {
 
             <StatCard
               title="High Risk Accounts"
-              value="17"
+              value={dashboardData
+                      ? dashboardData.highRiskAccounts.toString()
+                      : "--"
+                    }
               change="-6"
               positive={false}
               icon={AlertTriangle}
@@ -110,7 +161,10 @@ export default function Dashboard() {
 
             <StatCard
               title="Pending Reviews"
-              value="83"
+              value={dashboardData
+                      ? dashboardData.pendingReviews.toString()
+                      : "--"
+                    }
               change="+14"
               positive={true}
               icon={ClipboardCheck}
