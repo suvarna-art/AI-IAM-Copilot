@@ -1,53 +1,20 @@
 import { motion } from "framer-motion";
-import {
-  AlertTriangle,
-  ShieldCheck,
-  UserCheck,
-  KeyRound,
-} from "lucide-react";
+import { ShieldCheck } from "lucide-react";
+import type { Activity } from "../types/dashboard";
 
-const activities = [
-  {
-    id: 1,
-    event: "Privilege Escalation Detected",
-    user: "john.doe",
-    severity: "High",
-    time: "2 min ago",
-    icon: AlertTriangle,
-  },
-  {
-    id: 2,
-    event: "Access Review Completed",
-    user: "finance.manager",
-    severity: "Low",
-    time: "12 min ago",
-    icon: ShieldCheck,
-  },
-  {
-    id: 3,
-    event: "New Identity Provisioned",
-    user: "emma.wilson",
-    severity: "Medium",
-    time: "25 min ago",
-    icon: UserCheck,
-  },
-  {
-    id: 4,
-    event: "Password Reset Requested",
-    user: "alex.lee",
-    severity: "Low",
-    time: "48 min ago",
-    icon: KeyRound,
-  },
-];
-
-const severityStyles = {
-  High: "bg-red-500/15 text-red-400 border-red-500/30",
-  Medium: "bg-yellow-500/15 text-yellow-400 border-yellow-500/30",
-  Low: "bg-green-500/15 text-green-400 border-green-500/30",
+type ActivityTableProps = {
+  activities: Activity[];
 };
 
-export default function ActivityTable() {
+const statusStyles = {
+  Pending: "bg-yellow-500/15 text-yellow-400 border-yellow-500/30",
+  Completed: "bg-green-500/15 text-green-400 border-green-500/30",
+  Success: "bg-cyan-500/15 text-cyan-400 border-cyan-500/30",
+};
+
+export default function ActivityTable({
+  activities,
+}: ActivityTableProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 25 }}
@@ -72,10 +39,8 @@ export default function ActivityTable() {
       </div>
 
       <div className="space-y-4">
-
         {activities.map((activity, index) => {
-
-          const Icon = activity.icon;
+          const Icon = ShieldCheck;
 
           return (
             <motion.div
@@ -91,7 +56,6 @@ export default function ActivityTable() {
               className="flex items-center justify-between rounded-2xl border border-slate-800 bg-slate-950/60 p-5 hover:border-cyan-500/40 transition-all duration-300"
             >
               <div className="flex items-center gap-4">
-
                 <div className="rounded-xl bg-cyan-500/10 p-3">
                   <Icon
                     size={22}
@@ -100,41 +64,34 @@ export default function ActivityTable() {
                 </div>
 
                 <div>
-
                   <h3 className="font-semibold text-white">
-                    {activity.event}
+                    {activity.action}
                   </h3>
 
                   <p className="text-sm text-slate-400">
                     {activity.user}
                   </p>
-
                 </div>
-
               </div>
 
               <div className="text-right">
-
                 <span
                   className={`inline-block rounded-full border px-3 py-1 text-xs font-medium ${
-                    severityStyles[
-                      activity.severity as keyof typeof severityStyles
+                    statusStyles[
+                      activity.status as keyof typeof statusStyles
                     ]
                   }`}
                 >
-                  {activity.severity}
+                  {activity.status}
                 </span>
 
                 <p className="mt-2 text-xs text-slate-500">
                   {activity.time}
                 </p>
-
               </div>
-
             </motion.div>
           );
         })}
-
       </div>
     </motion.div>
   );

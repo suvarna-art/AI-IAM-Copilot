@@ -38,9 +38,16 @@ useEffect(() => {
 
       setDashboardData(data);
       setActivities(activityData);
+
     } catch (err) {
-      setError("Unable to load dashboard.");
-      console.error(err);
+      console.error("Dashboard Error:", err);
+
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Unknown Error");
+      }
+
     } finally {
       setLoading(false);
     }
@@ -190,7 +197,7 @@ if (error) {
 
       {/* Activity */}
 
-    <ActivityTable />
+    <ActivityTable activities={activities} />
 
 </div>
             <div>
