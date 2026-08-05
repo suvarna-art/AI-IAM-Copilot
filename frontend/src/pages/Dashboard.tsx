@@ -8,6 +8,7 @@ import IdentityAnalytics from "../components/IdentityAnalytics";
 import SystemStatus from "../components/SystemStatus";
 import WelcomeBanner from "../components/WelcomeBanner";
 import SecurityGauge from "../components/SecurityGauge";
+import AIConfidence from "../components/AIConfidence";
 
 import {
   ShieldCheck,
@@ -20,6 +21,7 @@ import { useEffect, useState } from "react";
 import { getDashboardData } from "../services/dashboard";
 import type { Activity, DashboardData } from "../types/dashboard";
 import { getActivities } from "../services/activity";
+import { getAIConfidence} from "../services/aiConfidence";
 
 export default function Dashboard() {
   const [dashboardData, setDashboardData] =
@@ -29,15 +31,18 @@ const [loading, setLoading] = useState(true);
 
 const [error, setError] = useState("");
 const [activities, setActivities] = useState<Activity[]>([]);
+const [aiConfidence, setAIConfidence] = useState<Awaited<ReturnType<typeof getAIConfidence>> | null>(null);
 
 useEffect(() => {
   async function loadDashboard() {
     try {
       const data = await getDashboardData();
       const activityData = await getActivities();
+      const aiData = await getAIConfidence();
 
       setDashboardData(data);
       setActivities(activityData);
+      setAIConfidence(aiData);
 
     } catch (err) {
       console.error("Dashboard Error:", err);
@@ -198,6 +203,13 @@ if (error) {
       {/* Activity */}
 
     <ActivityTable activities={activities} />
+    {aiConfidence && (
+  <AIConfidence
+    score={aiConfidence.score}
+    prediction={aiConfidence.prediction}
+    trend={aiConfidence.trend}
+  />
+)}
 
 </div>
             <div>
