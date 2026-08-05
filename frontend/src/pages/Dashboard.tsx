@@ -9,6 +9,7 @@ import SystemStatus from "../components/SystemStatus";
 import WelcomeBanner from "../components/WelcomeBanner";
 import SecurityGauge from "../components/SecurityGauge";
 import AIConfidence from "../components/AIConfidence";
+import RiskIntelligence from "../components/RiskIntelligence";
 
 import {
   ShieldCheck,
@@ -22,6 +23,7 @@ import { getDashboardData } from "../services/dashboard";
 import type { Activity, DashboardData } from "../types/dashboard";
 import { getActivities } from "../services/activity";
 import { getAIConfidence} from "../services/aiConfidence";
+import { getRiskIntelligence } from "../services/riskIntelligence";
 
 export default function Dashboard() {
   const [dashboardData, setDashboardData] =
@@ -32,6 +34,7 @@ const [loading, setLoading] = useState(true);
 const [error, setError] = useState("");
 const [activities, setActivities] = useState<Activity[]>([]);
 const [aiConfidence, setAIConfidence] = useState<Awaited<ReturnType<typeof getAIConfidence>> | null>(null);
+const [riskIntelligence, setRiskIntelligence] = useState<Awaited<ReturnType<typeof getRiskIntelligence>> | null>(null);
 
 useEffect(() => {
   async function loadDashboard() {
@@ -39,10 +42,14 @@ useEffect(() => {
       const data = await getDashboardData();
       const activityData = await getActivities();
       const aiData = await getAIConfidence();
+      const riskData = await getRiskIntelligence();
 
       setDashboardData(data);
       setActivities(activityData);
       setAIConfidence(aiData);
+      setRiskIntelligence(riskData);
+
+      console.log("Risk Intelligence:", riskData);
 
     } catch (err) {
       console.error("Dashboard Error:", err);
@@ -210,7 +217,15 @@ if (error) {
     trend={aiConfidence.trend}
   />
 )}
-
+{riskIntelligence && (
+  <RiskIntelligence
+    overallRisk={riskIntelligence.overallRisk}
+    riskScore={riskIntelligence.riskScore}
+    confidence={riskIntelligence.confidence}
+    topFinding={riskIntelligence.topFinding}
+    recommendations={riskIntelligence.recommendations}
+  />
+)}
 </div>
             <div>
 
