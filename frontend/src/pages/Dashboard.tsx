@@ -10,6 +10,7 @@ import WelcomeBanner from "../components/WelcomeBanner";
 import SecurityGauge from "../components/SecurityGauge";
 import AIConfidence from "../components/AIConfidence";
 import RiskIntelligence from "../components/RiskIntelligence";
+import AccessReview from "../components/AccessReview";
 
 import {
   ShieldCheck,
@@ -24,6 +25,7 @@ import type { Activity, DashboardData } from "../types/dashboard";
 import { getActivities } from "../services/activity";
 import { getAIConfidence} from "../services/aiConfidence";
 import { getRiskIntelligence } from "../services/riskIntelligence";
+import { getAccessReview } from "../services/accessReview";
 
 export default function Dashboard() {
   const [dashboardData, setDashboardData] =
@@ -35,6 +37,8 @@ const [error, setError] = useState("");
 const [activities, setActivities] = useState<Activity[]>([]);
 const [aiConfidence, setAIConfidence] = useState<Awaited<ReturnType<typeof getAIConfidence>> | null>(null);
 const [riskIntelligence, setRiskIntelligence] = useState<Awaited<ReturnType<typeof getRiskIntelligence>> | null>(null);
+  const [accessReview, setAccessReview] =
+useState<Awaited<ReturnType<typeof getAccessReview>> | null>(null);
 
 useEffect(() => {
   async function loadDashboard() {
@@ -43,11 +47,13 @@ useEffect(() => {
       const activityData = await getActivities();
       const aiData = await getAIConfidence();
       const riskData = await getRiskIntelligence();
+      const accessReviewData = await getAccessReview();
 
       setDashboardData(data);
       setActivities(activityData);
       setAIConfidence(aiData);
       setRiskIntelligence(riskData);
+      setAccessReview(accessReviewData);
 
       console.log("Risk Intelligence:", riskData);
 
@@ -225,6 +231,16 @@ if (error) {
     topFinding={riskIntelligence.topFinding}
     recommendations={riskIntelligence.recommendations}
   />
+)}
+
+{accessReview && (
+    <AccessReview
+        completedReviews={accessReview.completedReviews}
+        pendingReviews={accessReview.pendingReviews}
+        overdueReviews={accessReview.overdueReviews}
+        completionRate={accessReview.completionRate}
+        nextCampaign={accessReview.nextCampaign}
+    />
 )}
 </div>
             <div>

@@ -137,10 +137,6 @@ duration-300 transition-all"
         className="mr-3 text-cyan-400 flex-shrink-0"
     />
 
-<span className="text-white">
-  {item}
-</span>
-
       <span className="text-white">
         {item}
       </span>
