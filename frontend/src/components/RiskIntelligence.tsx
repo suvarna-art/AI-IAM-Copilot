@@ -18,7 +18,7 @@ export default function RiskIntelligence({
   <div className="rounded-3xl border border-slate-800 bg-slate-900/80 backdrop-blur-xl p-6">
 
     {/* Header */}
-    <div className="flex items-center gap-2">
+    <div className="flex items-center mb-5 gap-2">
 
   <ShieldAlert
     size={20}
@@ -28,27 +28,25 @@ export default function RiskIntelligence({
   <h2 className="text-xl font-bold text-white">
     Risk Intelligence
   </h2>
+</div>
+   {/* Overall Risk */}
+  <div className="mb-5">
+
+    <p className="text-xs uppercase tracking-wide text-slate-400">
+    Overall Risk
+    </p>
+
+    <div className="mt-2 inline-flex items-center rounded-full border border-red-500/30 bg-red-500/10 px-4 py-1.5">
+
+    <span className="mr-2 h-2.5 w-2.5 rounded-full bg-red-500" />
+
+    <span className="text-base font-semibold text-red-400">
+      {overallRisk}
+    </span>
+
+  </div>
 
 </div>
-
-    {/* Overall Risk */}
-    <div className="mb-6">
-
-      <p className="text-sm uppercase tracking-wider text-slate-400">
-        Overall Risk
-      </p>
-
-      <div className="mt-3 inline-flex items-center rounded-full border border-red-500/30 bg-red-500/10 px-5 py-2">
-
-        <span className="mr-2 h-3 w-3 rounded-full bg-red-500"></span>
-
-        <span className="text-lg font-bold text-red-400">
-          {overallRisk}
-        </span>
-
-      </div>
-
-    </div>
 
     <div className="grid grid-cols-2 gap-4 mb-6">
 

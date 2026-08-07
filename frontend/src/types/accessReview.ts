@@ -1,7 +1,14 @@
-export interface AccessReview {
+export type GovernanceAction = {
+  type: "overdue" | "pending";
+  count: number;
+  title: string;
+  description: string;
+};
+
+export type AccessReview = {
   completedReviews: number;
   pendingReviews: number;
   overdueReviews: number;
   completionRate: number;
   nextCampaign: string;
-}
+};
