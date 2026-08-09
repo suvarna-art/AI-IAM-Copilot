@@ -1,6 +1,5 @@
 import { motion } from "framer-motion";
 import {
-  Wifi,
   ShieldCheck,
   BrainCircuit,
   Clock3,

@@ -1,8 +1,5 @@
 import { useEffect, useState } from "react";
 
-import Sidebar from "../components/Sidebar";
-import Header from "../components/Header";
-
 import StatCard from "../components/StatCard";
 import ActivityTable from "../components/ActivityTable";
 import AIInsights from "../components/AIInsights";
@@ -27,13 +24,19 @@ import { getAIConfidence } from "../services/aiConfidence";
 import { getRiskIntelligence } from "../services/riskIntelligence";
 import { getAccessReview } from "../services/accessReview";
 
-import type { Activity, DashboardData } from "../types/dashboard";
+import type {
+  Activity,
+  DashboardData,
+} from "../types/dashboard";
+
 import type {
   AccessReview as AccessReviewData,
   GovernanceAction,
 } from "../types/accessReview";
 
+
 export default function Dashboard() {
+
   /* =========================================================
      DASHBOARD STATE
   ========================================================= */
@@ -59,13 +62,17 @@ export default function Dashboard() {
   const [error, setError] =
     useState("");
 
+
   /* =========================================================
      LOAD DASHBOARD DATA
   ========================================================= */
 
   useEffect(() => {
+
     async function loadDashboard() {
+
       try {
+
         /*
          * Load each service independently.
          *
@@ -73,52 +80,82 @@ export default function Dashboard() {
          * the rest of the dashboard.
          */
 
-        const dashboardPromise = getDashboardData();
-        const activityPromise = getActivities();
-        const aiConfidencePromise = getAIConfidence();
-        const riskPromise = getRiskIntelligence();
-        const accessReviewPromise = getAccessReview();
+        const dashboardPromise =
+          getDashboardData();
+
+        const activityPromise =
+          getActivities();
+
+        const aiConfidencePromise =
+          getAIConfidence();
+
+        const riskPromise =
+          getRiskIntelligence();
+
+        const accessReviewPromise =
+          getAccessReview();
+
 
         /* =====================================================
            Dashboard Data
         ===================================================== */
 
         try {
-          const data = await dashboardPromise;
+
+          const data =
+            await dashboardPromise;
 
           setDashboardData(data);
 
-          console.log("Dashboard Data:", data);
+          console.log(
+            "Dashboard Data:",
+            data
+          );
+
         } catch (err) {
+
           console.error(
             "Dashboard Data Error:",
             err
           );
+
         }
+
 
         /* =====================================================
            Activity Data
         ===================================================== */
 
         try {
-          const data = await activityPromise;
+
+          const data =
+            await activityPromise;
 
           setActivities(data);
 
-          console.log("Activity Data:", data);
+          console.log(
+            "Activity Data:",
+            data
+          );
+
         } catch (err) {
+
           console.error(
             "Activity Data Error:",
             err
           );
+
         }
+
 
         /* =====================================================
            AI Confidence
         ===================================================== */
 
         try {
-          const data = await aiConfidencePromise;
+
+          const data =
+            await aiConfidencePromise;
 
           setAIConfidence(data);
 
@@ -126,19 +163,25 @@ export default function Dashboard() {
             "AI Confidence:",
             data
           );
+
         } catch (err) {
+
           console.error(
             "AI Confidence Error:",
             err
           );
+
         }
+
 
         /* =====================================================
            Risk Intelligence
         ===================================================== */
 
         try {
-          const data = await riskPromise;
+
+          const data =
+            await riskPromise;
 
           setRiskIntelligence(data);
 
@@ -146,19 +189,25 @@ export default function Dashboard() {
             "Risk Intelligence:",
             data
           );
+
         } catch (err) {
+
           console.error(
             "Risk Intelligence Error:",
             err
           );
+
         }
+
 
         /* =====================================================
            Access Review
         ===================================================== */
 
         try {
-          const data = await accessReviewPromise;
+
+          const data =
+            await accessReviewPromise;
 
           setAccessReview(data);
 
@@ -166,17 +215,19 @@ export default function Dashboard() {
             "ACCESS REVIEW API DATA:",
             data
           );
-          console.log(
-  "OVERDUE:",
-  data.overdueReviews
-);
 
-console.log(
-  "PENDING:",
-  data.pendingReviews
-);
+          console.log(
+            "OVERDUE:",
+            data.overdueReviews
+          );
+
+          console.log(
+            "PENDING:",
+            data.pendingReviews
+          );
 
         } catch (err) {
+
           console.error(
             "Access Review Error:",
             err
@@ -185,33 +236,46 @@ console.log(
           setError(
             "Unable to load Access Review data."
           );
+
         }
 
       } catch (err) {
+
         console.error(
           "Dashboard Error:",
           err
         );
 
         if (err instanceof Error) {
-          setError(err.message);
+
+          setError(
+            err.message
+          );
+
         } else {
+
           setError(
             "Unknown error occurred"
           );
+
         }
 
       } finally {
+
         setLoading(false);
+
       }
     }
 
+
     loadDashboard();
+
   }, []);
+
 
   /* =========================================================
      GOVERNANCE ACTIONS
-     
+
      Dashboard is the Smart Component.
      It prepares governance data before passing it
      to the presentational components.
@@ -219,254 +283,370 @@ console.log(
 
   const governanceActions: GovernanceAction[] = [];
 
+
   if (accessReview) {
-    if (accessReview.overdueReviews > 0) {
+
+    if (
+      accessReview.overdueReviews > 0
+    ) {
+
       governanceActions.push({
+
         type: "overdue",
-        count: accessReview.overdueReviews,
-        title: "Overdue Reviews",
+
+        count:
+          accessReview.overdueReviews,
+
+        title:
+          "Overdue Reviews",
+
         description:
           `${accessReview.overdueReviews} reviews require immediate attention`,
+
       });
+
     }
 
-    if (accessReview.pendingReviews > 0) {
+
+    if (
+      accessReview.pendingReviews > 0
+    ) {
+
       governanceActions.push({
+
         type: "pending",
-        count: accessReview.pendingReviews,
-        title: "Pending Reviews",
+
+        count:
+          accessReview.pendingReviews,
+
+        title:
+          "Pending Reviews",
+
         description:
           `${accessReview.pendingReviews} reviews awaiting certification`,
+
       });
+
     }
+
   }
+
 
   /* =========================================================
      LOADING STATE
   ========================================================= */
 
   if (loading) {
+
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-950 text-slate-300">
-        Loading Dashboard...
-      </div>
+
+      <main className="flex flex-1 items-center justify-center p-8">
+
+        <div className="text-lg text-slate-400">
+
+          Loading Dashboard...
+
+        </div>
+
+      </main>
+
     );
+
   }
+
 
   /* =========================================================
      ERROR STATE
+
+     Only block the dashboard if the Access Review
+     data itself failed completely.
   ========================================================= */
 
-  if (error && !accessReview) {
+  if (
+    error &&
+    !accessReview
+  ) {
+
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-950">
-        <div className="rounded-2xl border border-red-500/20 bg-red-500/10 px-6 py-4 text-red-400">
+
+      <main className="flex flex-1 items-center justify-center p-8">
+
+        <div className="rounded-xl border border-red-500/20 bg-red-500/10 px-6 py-4 text-red-400">
+
           {error}
+
         </div>
-      </div>
+
+      </main>
+
     );
+
   }
+
 
   /* =========================================================
      MAIN DASHBOARD
   ========================================================= */
 
   return (
-    <div className="relative flex min-h-screen overflow-hidden bg-slate-950">
+
+    <main className="flex-1 space-y-8 p-8">
 
       {/* =====================================================
-          SIDEBAR
+          HERO
       ===================================================== */}
 
-      <Sidebar />
+      <section>
+
+        <WelcomeBanner />
+
+      </section>
+
 
       {/* =====================================================
-          MAIN APPLICATION AREA
+          KPI CARDS
       ===================================================== */}
 
-      <div className="flex min-w-0 flex-1 flex-col">
+      <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
 
-        <Header />
+        <StatCard
 
-        <main className="flex-1 space-y-8 p-8">
+          title="Security Score"
+
+          value={
+            dashboardData
+              ? `${dashboardData.securityScore}%`
+              : "--"
+          }
+
+          change="+2.1%"
+
+          positive={true}
+
+          icon={ShieldCheck}
+
+        />
+
+
+        <StatCard
+
+          title="Active Identities"
+
+          value={
+            dashboardData
+              ? dashboardData.activeIdentities.toLocaleString()
+              : "--"
+          }
+
+          change="+318"
+
+          positive={true}
+
+          icon={Users}
+
+        />
+
+
+        <StatCard
+
+          title="High Risk Accounts"
+
+          value={
+            dashboardData
+              ? dashboardData.highRiskAccounts.toString()
+              : "--"
+          }
+
+          change="-6"
+
+          positive={false}
+
+          icon={AlertTriangle}
+
+        />
+
+
+        <StatCard
+
+          title="Pending Reviews"
+
+          value={
+            dashboardData
+              ? dashboardData.pendingReviews.toString()
+              : "--"
+          }
+
+          change="+14"
+
+          positive={true}
+
+          icon={ClipboardCheck}
+
+        />
+
+      </section>
+
+
+      {/* =====================================================
+          MAIN DASHBOARD CONTENT
+      ===================================================== */}
+
+      <section className="grid gap-6 xl:grid-cols-3">
+
+
+        {/* ===================================================
+            PRIMARY COLUMN
+        =================================================== */}
+
+        <div className="min-w-0 space-y-6 xl:col-span-2">
+
 
           {/* =================================================
-              HERO
+              SECURITY GAUGE
           ================================================= */}
 
-          <section>
-            <WelcomeBanner />
-          </section>
+          <SecurityGauge
+
+            score={
+              dashboardData?.securityScore ?? 94
+            }
+
+          />
+
 
           {/* =================================================
-              KPI CARDS
+              IDENTITY ANALYTICS
           ================================================= */}
 
-          <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+          <IdentityAnalytics />
 
-            <StatCard
-              title="Security Score"
-              value={
-                dashboardData
-                  ? `${dashboardData.securityScore}%`
-                  : "--"
-              }
-              change="+2.1%"
-              positive={true}
-              icon={ShieldCheck}
-            />
-
-            <StatCard
-              title="Active Identities"
-              value={
-                dashboardData
-                  ? dashboardData.activeIdentities.toLocaleString()
-                  : "--"
-              }
-              change="+318"
-              positive={true}
-              icon={Users}
-            />
-
-            <StatCard
-              title="High Risk Accounts"
-              value={
-                dashboardData
-                  ? dashboardData.highRiskAccounts.toString()
-                  : "--"
-              }
-              change="-6"
-              positive={false}
-              icon={AlertTriangle}
-            />
-
-            <StatCard
-              title="Pending Reviews"
-              value={
-                dashboardData
-                  ? dashboardData.pendingReviews.toString()
-                  : "--"
-              }
-              change="+14"
-              positive={true}
-              icon={ClipboardCheck}
-            />
-
-          </section>
 
           {/* =================================================
-              MAIN DASHBOARD CONTENT
+              RECENT ACTIVITY
           ================================================= */}
 
-          <section className="grid gap-6 xl:grid-cols-3">
+          <ActivityTable
 
-            {/* =================================================
-                PRIMARY COLUMN
-            ================================================= */}
+            activities={
+              activities
+            }
 
-            <div className="min-w-0 space-y-6 xl:col-span-2">
+          />
 
-              {/* Security Gauge */}
 
-              <SecurityGauge
-                score={
-                  dashboardData?.securityScore ?? 94
-                }
-              />
+          {/* =================================================
+              AI CONFIDENCE
+          ================================================= */}
 
-              {/* Identity Analytics */}
+          {aiConfidence && (
 
-              <IdentityAnalytics />
+            <AIConfidence
 
-              {/* Recent Activity */}
+              score={
+                aiConfidence.score
+              }
 
-              <ActivityTable
-                activities={activities}
-              />
+              prediction={
+                aiConfidence.prediction
+              }
 
-              {/* =================================================
-                  AI CONFIDENCE
-              ================================================= */}
+              trend={
+                aiConfidence.trend
+              }
 
-              {aiConfidence && (
-                <AIConfidence
-                  score={aiConfidence.score}
-                  prediction={aiConfidence.prediction}
-                  trend={aiConfidence.trend}
-                />
-              )}
+            />
 
-              {/* =================================================
-                  RISK INTELLIGENCE
-              ================================================= */}
+          )}
 
-              {riskIntelligence && (
-                <RiskIntelligence
-                  overallRisk={
-                    riskIntelligence.overallRisk
-                  }
-                  riskScore={
-                    riskIntelligence.riskScore
-                  }
-                  confidence={
-                    riskIntelligence.confidence
-                  }
-                  topFinding={
-                    riskIntelligence.topFinding
-                  }
-                  recommendations={
-                    riskIntelligence.recommendations
-                  }
-                />
-              )}
 
-              {/* =================================================
-                  ACCESS REVIEW
-              ================================================= */}
+          {/* =================================================
+              RISK INTELLIGENCE
+          ================================================= */}
 
-              {accessReview && (
-                <AccessReview
-                  completedReviews={
-                    accessReview.completedReviews
-                  }
-                  pendingReviews={
-                    accessReview.pendingReviews
-                  }
-                  overdueReviews={
-                    accessReview.overdueReviews
-                  }
-                  completionRate={
-                    accessReview.completionRate
-                  }
-                  nextCampaign={
-                    accessReview.nextCampaign
-                  }
-                  governanceActions={
-                    governanceActions
-                  }
-                />
-              )}
+          {riskIntelligence && (
 
-            </div>
+            <RiskIntelligence
 
-            {/* =================================================
-                SECONDARY COLUMN
-            ================================================= */}
+              overallRisk={
+                riskIntelligence.overallRisk
+              }
 
-            <div className="min-w-0 space-y-6">
+              riskScore={
+                riskIntelligence.riskScore
+              }
 
-              <AIInsights />
+              confidence={
+                riskIntelligence.confidence
+              }
 
-              <SystemStatus />
+              topFinding={
+                riskIntelligence.topFinding
+              }
 
-            </div>
+              recommendations={
+                riskIntelligence.recommendations
+              }
 
-          </section>
+            />
 
-        </main>
+          )}
 
-      </div>
 
-    </div>
+          {/* =================================================
+              ACCESS REVIEW
+          ================================================= */}
+
+          {accessReview && (
+
+            <AccessReview
+
+              completedReviews={
+                accessReview.completedReviews
+              }
+
+              pendingReviews={
+                accessReview.pendingReviews
+              }
+
+              overdueReviews={
+                accessReview.overdueReviews
+              }
+
+              completionRate={
+                accessReview.completionRate
+              }
+
+              nextCampaign={
+                accessReview.nextCampaign
+              }
+
+              governanceActions={
+                governanceActions
+              }
+
+            />
+
+          )}
+
+        </div>
+
+
+        {/* ===================================================
+            SECONDARY COLUMN
+        =================================================== */}
+
+        <div className="min-w-0 space-y-6">
+
+          <AIInsights />
+
+          <SystemStatus />
+
+        </div>
+
+
+      </section>
+
+    </main>
+
   );
 }
