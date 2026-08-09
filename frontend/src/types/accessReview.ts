@@ -4,11 +4,10 @@ export type GovernanceAction = {
   title: string;
   description: string;
 };
-
-export type AccessReview = {
+export interface AccessReview {
   completedReviews: number;
   pendingReviews: number;
   overdueReviews: number;
   completionRate: number;
   nextCampaign: string;
-};
+}
