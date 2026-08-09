@@ -8,20 +8,12 @@ import AppShell from "./components/AppShell";
 
 import Dashboard from "./pages/Dashboard";
 import Identities from "./pages/Identities";
+import AccessControl from "./pages/AccessControl";
 
-function AccessControl() {
-  return (
-    <div className="space-y-2">
-      <h1 className="text-2xl font-bold text-white">
-        Access Control
-      </h1>
-
-      <p className="text-sm text-slate-400">
-        Identity access, permissions and governance controls.
-      </p>
-    </div>
-  );
-}
+<Route
+  path="/access-control"
+  element={<AccessControl />}
+/>
 
 function Roles() {
   return (
