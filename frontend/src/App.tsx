@@ -14,22 +14,9 @@ import RiskIntelligence from "./pages/RiskIntelligence";
 import Activity from "./pages/Activity";
 import Analytics from "./pages/Analytics";
 import Settings from "./pages/Settings";
+import Roles from "./pages/Roles";
 
 import AICopilot from "./components/AICopilot";
-
-function Roles() {
-  return (
-    <div>
-      <h1 className="text-2xl font-bold text-white">
-        Roles
-      </h1>
-
-      <p className="mt-1 text-sm text-slate-400">
-        Enterprise role and permission management.
-      </p>
-    </div>
-  );
-}
 
 export default function App() {
   return (

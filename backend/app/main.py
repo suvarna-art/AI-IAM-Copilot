@@ -12,6 +12,7 @@ from app.routers import analytics
 from app.api import access_review
 from app.api import access_control
 from app.routers import settings
+from app.routers import roles
 
 
 app = FastAPI(
@@ -59,6 +60,8 @@ app.include_router(identities.router)
 app.include_router(analytics.router)
 
 app.include_router(settings.router)
+
+app.include_router(roles.router)
 
 
 # =========================================================
