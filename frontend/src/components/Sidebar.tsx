@@ -2,8 +2,10 @@ import {
   LayoutDashboard,
   Users,
   ShieldCheck,
+  ClipboardCheck,
   KeyRound,
   Bot,
+  BrainCircuit,
   BarChart3,
   Settings,
 } from "lucide-react";
@@ -25,6 +27,16 @@ const navigation = [
     name: "Access Control",
     path: "/access-control",
     icon: ShieldCheck,
+  },
+  {
+    name: "Access Reviews",
+    path: "/access-reviews",
+    icon: ClipboardCheck,
+  },
+  {
+  name: "Risk Intelligence",
+  path: "/risk-intelligence",
+  icon: BrainCircuit,
   },
   {
     name: "Roles",
@@ -50,14 +62,10 @@ const navigation = [
 
 export default function Sidebar() {
   return (
-    <aside className="flex min-h-screen w-64 flex-col border-r border-slate-800 bg-slate-950">
+    <aside className="flex w-64 shrink-0 flex-col border-r border-slate-800 bg-slate-950">
 
-      {/* =====================================================
-          BRAND
-      ===================================================== */}
-
+      {/* BRAND */}
       <div className="border-b border-slate-800 px-6 py-7">
-
         <h1 className="text-xl font-bold tracking-tight text-cyan-400">
           IdentityForge AI
         </h1>
@@ -65,13 +73,9 @@ export default function Sidebar() {
         <p className="mt-1 text-xs text-slate-500">
           Enterprise Identity Intelligence
         </p>
-
       </div>
 
-      {/* =====================================================
-          NAVIGATION
-      ===================================================== */}
-
+      {/* NAVIGATION */}
       <nav className="flex-1 space-y-2 px-4 py-6">
 
         {navigation.map((item) => {
@@ -101,10 +105,7 @@ export default function Sidebar() {
 
       </nav>
 
-      {/* =====================================================
-          SECURITY SCORE
-      ===================================================== */}
-
+      {/* SECURITY SCORE */}
       <div className="border-t border-slate-800 p-4">
 
         <div className="rounded-xl bg-slate-900/80 p-4">

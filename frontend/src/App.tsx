@@ -9,11 +9,9 @@ import AppShell from "./components/AppShell";
 import Dashboard from "./pages/Dashboard";
 import Identities from "./pages/Identities";
 import AccessControl from "./pages/AccessControl";
+import AccessReview from "./pages/AccessReview";
+import RiskIntelligence from "./pages/RiskIntelligence";
 
-<Route
-  path="/access-control"
-  element={<AccessControl />}
-/>
 
 function Roles() {
   return (
@@ -29,6 +27,7 @@ function Roles() {
   );
 }
 
+
 function AICopilot() {
   return (
     <div className="space-y-2">
@@ -42,6 +41,7 @@ function AICopilot() {
     </div>
   );
 }
+
 
 function Analytics() {
   return (
@@ -57,6 +57,7 @@ function Analytics() {
   );
 }
 
+
 function Settings() {
   return (
     <div className="space-y-2">
@@ -70,6 +71,7 @@ function Settings() {
     </div>
   );
 }
+
 
 export default function App() {
   return (
@@ -85,11 +87,13 @@ export default function App() {
             element={<Dashboard />}
           />
 
+
           {/* Identity Management */}
           <Route
             path="/identities"
             element={<Identities />}
           />
+
 
           {/* Access Control */}
           <Route
@@ -97,11 +101,25 @@ export default function App() {
             element={<AccessControl />}
           />
 
+
+          {/* Access Reviews */}
+          <Route
+            path="/access-reviews"
+            element={<AccessReview />}
+          />
+
+          {/* Risk Intelligence */}
+          <Route
+            path="/risk-intelligence"
+            element={<RiskIntelligence />}
+          />
+          
           {/* Roles */}
           <Route
             path="/roles"
             element={<Roles />}
           />
+
 
           {/* AI Copilot */}
           <Route
@@ -109,11 +127,13 @@ export default function App() {
             element={<AICopilot />}
           />
 
+
           {/* Analytics */}
           <Route
             path="/analytics"
             element={<Analytics />}
           />
+
 
           {/* Settings */}
           <Route
