@@ -11,6 +11,7 @@ import Identities from "./pages/Identities";
 import AccessControl from "./pages/AccessControl";
 import AccessReview from "./pages/AccessReview";
 import RiskIntelligence from "./pages/RiskIntelligence";
+import Activity from "./pages/Activity";
 
 
 function Roles() {
@@ -113,7 +114,12 @@ export default function App() {
             path="/risk-intelligence"
             element={<RiskIntelligence />}
           />
-          
+
+          <Route
+            path="/activity"
+            element={<Activity />}
+          />
+
           {/* Roles */}
           <Route
             path="/roles"

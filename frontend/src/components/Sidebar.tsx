@@ -6,6 +6,7 @@ import {
   KeyRound,
   Bot,
   BrainCircuit,
+  Activity,
   BarChart3,
   Settings,
 } from "lucide-react";
@@ -34,9 +35,14 @@ const navigation = [
     icon: ClipboardCheck,
   },
   {
-  name: "Risk Intelligence",
-  path: "/risk-intelligence",
-  icon: BrainCircuit,
+    name: "Risk Intelligence",
+    path: "/risk-intelligence",
+    icon: BrainCircuit,
+  },
+  {
+    name: "Activity",
+    path: "/activity",
+    icon: Activity,
   },
   {
     name: "Roles",
