@@ -13,73 +13,54 @@ import AccessReview from "./pages/AccessReview";
 import RiskIntelligence from "./pages/RiskIntelligence";
 import Activity from "./pages/Activity";
 
+import AICopilot from "./components/AICopilot";
 
 function Roles() {
   return (
-    <div className="space-y-2">
+    <div>
       <h1 className="text-2xl font-bold text-white">
         Roles
       </h1>
 
-      <p className="text-sm text-slate-400">
+      <p className="mt-1 text-sm text-slate-400">
         Enterprise role and permission management.
       </p>
     </div>
   );
 }
 
-
-function AICopilot() {
-  return (
-    <div className="space-y-2">
-      <h1 className="text-2xl font-bold text-white">
-        AI Copilot
-      </h1>
-
-      <p className="text-sm text-slate-400">
-        Intelligent IAM analysis and governance assistance.
-      </p>
-    </div>
-  );
-}
-
-
 function Analytics() {
   return (
-    <div className="space-y-2">
+    <div>
       <h1 className="text-2xl font-bold text-white">
         Analytics
       </h1>
 
-      <p className="text-sm text-slate-400">
+      <p className="mt-1 text-sm text-slate-400">
         Enterprise identity security analytics and insights.
       </p>
     </div>
   );
 }
 
-
 function Settings() {
   return (
-    <div className="space-y-2">
+    <div>
       <h1 className="text-2xl font-bold text-white">
         Settings
       </h1>
 
-      <p className="text-sm text-slate-400">
+      <p className="mt-1 text-sm text-slate-400">
         Application and security configuration.
       </p>
     </div>
   );
 }
 
-
 export default function App() {
   return (
     <BrowserRouter>
-
       <AppShell>
-
         <Routes>
 
           {/* Dashboard */}
@@ -88,20 +69,17 @@ export default function App() {
             element={<Dashboard />}
           />
 
-
-          {/* Identity Management */}
+          {/* Identities */}
           <Route
             path="/identities"
             element={<Identities />}
           />
-
 
           {/* Access Control */}
           <Route
             path="/access-control"
             element={<AccessControl />}
           />
-
 
           {/* Access Reviews */}
           <Route
@@ -115,6 +93,7 @@ export default function App() {
             element={<RiskIntelligence />}
           />
 
+          {/* Activity */}
           <Route
             path="/activity"
             element={<Activity />}
@@ -126,20 +105,17 @@ export default function App() {
             element={<Roles />}
           />
 
-
           {/* AI Copilot */}
           <Route
             path="/copilot"
             element={<AICopilot />}
           />
 
-
           {/* Analytics */}
           <Route
             path="/analytics"
             element={<Analytics />}
           />
-
 
           {/* Settings */}
           <Route
@@ -148,9 +124,7 @@ export default function App() {
           />
 
         </Routes>
-
       </AppShell>
-
     </BrowserRouter>
   );
 }
