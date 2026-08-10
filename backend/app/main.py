@@ -8,7 +8,7 @@ from app.routers.ai_confidence import router as ai_confidence_router
 from app.routers import risk_intelligence
 from app.routers import copilot
 from app.routers import identities
-
+from app.routers import analytics
 from app.api import access_review
 from app.api import access_control
 
@@ -54,6 +54,8 @@ app.include_router(access_control.router)
 app.include_router(copilot.router)
 
 app.include_router(identities.router)
+
+app.include_router(analytics.router)
 
 
 # =========================================================

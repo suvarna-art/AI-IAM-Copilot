@@ -35,6 +35,11 @@ const navigation = [
     icon: ClipboardCheck,
   },
   {
+    name: "Roles",
+    path: "/roles",
+    icon: KeyRound,
+  },
+  {
     name: "Risk Intelligence",
     path: "/risk-intelligence",
     icon: BrainCircuit,
@@ -43,11 +48,6 @@ const navigation = [
     name: "Activity",
     path: "/activity",
     icon: Activity,
-  },
-  {
-    name: "Roles",
-    path: "/roles",
-    icon: KeyRound,
   },
   {
     name: "AI Copilot",

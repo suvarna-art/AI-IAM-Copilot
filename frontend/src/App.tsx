@@ -12,6 +12,7 @@ import AccessControl from "./pages/AccessControl";
 import AccessReview from "./pages/AccessReview";
 import RiskIntelligence from "./pages/RiskIntelligence";
 import Activity from "./pages/Activity";
+import Analytics from "./pages/Analytics";
 
 import AICopilot from "./components/AICopilot";
 
@@ -24,20 +25,6 @@ function Roles() {
 
       <p className="mt-1 text-sm text-slate-400">
         Enterprise role and permission management.
-      </p>
-    </div>
-  );
-}
-
-function Analytics() {
-  return (
-    <div>
-      <h1 className="text-2xl font-bold text-white">
-        Analytics
-      </h1>
-
-      <p className="mt-1 text-sm text-slate-400">
-        Enterprise identity security analytics and insights.
       </p>
     </div>
   );
