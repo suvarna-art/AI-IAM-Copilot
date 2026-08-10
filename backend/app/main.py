@@ -13,6 +13,7 @@ from app.api import access_review
 from app.api import access_control
 from app.routers import settings
 from app.routers import roles
+from app.routers import privileged_access
 
 
 app = FastAPI(
@@ -63,7 +64,7 @@ app.include_router(settings.router)
 
 app.include_router(roles.router)
 
-
+app.include_router(privileged_access.router)
 # =========================================================
 # ROOT
 # =========================================================
