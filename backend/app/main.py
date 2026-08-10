@@ -11,6 +11,7 @@ from app.routers import identities
 from app.routers import analytics
 from app.api import access_review
 from app.api import access_control
+from app.routers import settings
 
 
 app = FastAPI(
@@ -56,6 +57,8 @@ app.include_router(copilot.router)
 app.include_router(identities.router)
 
 app.include_router(analytics.router)
+
+app.include_router(settings.router)
 
 
 # =========================================================
