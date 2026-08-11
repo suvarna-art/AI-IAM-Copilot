@@ -36,6 +36,9 @@ backend/.env
 .env
 env.txt
 
+# Frontend environment
+frontend/.env*
+
 # =========================
 # Node
 # =========================
