@@ -15,7 +15,7 @@ import Activity from "./pages/Activity";
 import Analytics from "./pages/Analytics";
 import Settings from "./pages/Settings";
 import Roles from "./pages/Roles";
-
+import PrivilegedAccess from "./pages/PrivilegedAccess";
 import AICopilot from "./components/AICopilot";
 
 export default function App() {
@@ -41,7 +41,12 @@ export default function App() {
             path="/access-control"
             element={<AccessControl />}
           />
-
+          
+          {/*Privileged Access8*/}
+          <Route
+            path="/privileged-access"
+            element={<PrivilegedAccess />}
+          />
           {/* Access Reviews */}
           <Route
             path="/access-reviews"

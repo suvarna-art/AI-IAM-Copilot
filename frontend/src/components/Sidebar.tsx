@@ -2,6 +2,7 @@ import {
   LayoutDashboard,
   Users,
   ShieldCheck,
+  LockKeyhole,
   ClipboardCheck,
   KeyRound,
   Bot,
@@ -28,6 +29,11 @@ const navigation = [
     name: "Access Control",
     path: "/access-control",
     icon: ShieldCheck,
+  },
+  {
+  name: "Privileged Access",
+  path: "/privileged-access",
+  icon: LockKeyhole,
   },
   {
     name: "Access Reviews",
