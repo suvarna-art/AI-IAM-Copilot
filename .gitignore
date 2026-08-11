@@ -38,6 +38,7 @@ env.txt
 
 # Frontend environment
 frontend/.env*
+!frontend/.env.production.example
 
 # =========================
 # Node

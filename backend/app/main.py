@@ -1,3 +1,6 @@
+import os
+
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -16,6 +19,21 @@ from app.routers import roles
 from app.routers import privileged_access
 
 
+load_dotenv()
+
+
+cors_origins = os.getenv(
+    "BACKEND_CORS_ORIGINS",
+    "http://localhost:5173",
+).split(",")
+
+cors_origins = [
+    origin.strip()
+    for origin in cors_origins
+    if origin.strip()
+]
+
+
 app = FastAPI(
     title="IdentityForge AI - AI-IAM Copilot",
     description="Enterprise Identity Security Platform",
@@ -29,9 +47,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-    ],
+    allow_origins=cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -43,28 +59,20 @@ app.add_middleware(
 # =========================================================
 
 app.include_router(dashboard_router)
-
 app.include_router(activities_router)
-
 app.include_router(ai_confidence_router)
 
 app.include_router(risk_intelligence.router)
-
 app.include_router(access_review.router)
-
 app.include_router(access_control.router)
-
 app.include_router(copilot.router)
-
 app.include_router(identities.router)
-
 app.include_router(analytics.router)
-
 app.include_router(settings.router)
-
 app.include_router(roles.router)
-
 app.include_router(privileged_access.router)
+
+
 # =========================================================
 # ROOT
 # =========================================================
