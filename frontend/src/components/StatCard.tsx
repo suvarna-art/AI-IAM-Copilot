@@ -114,32 +114,44 @@ export default function StatCard({
       </div>
 
       <div className="relative mt-6 flex items-center gap-2">
-        {positive ? (
-          <ArrowUpRight
-            size={18}
-            className="text-green-400"
-          />
-        ) : (
-          <ArrowDownRight
-            size={18}
-            className="text-red-400"
-          />
-        )}
+  {change === "Live" ? (
+    <>
+      <span className="h-2 w-2 rounded-full bg-green-400" />
 
-        <span
-          className={`font-semibold ${
-            positive
-              ? "text-green-400"
-              : "text-red-400"
-          }`}
-        >
-          {change}
-        </span>
+      <span className="font-semibold text-green-400">
+        Live data
+      </span>
+    </>
+  ) : (
+    <>
+      {positive ? (
+        <ArrowUpRight
+          size={18}
+          className="text-green-400"
+        />
+      ) : (
+        <ArrowDownRight
+          size={18}
+          className="text-red-400"
+        />
+      )}
 
-        <span className="text-slate-500">
-          vs last week
-        </span>
-      </div>
+      <span
+        className={`font-semibold ${
+          positive
+            ? "text-green-400"
+            : "text-red-400"
+        }`}
+      >
+        {change}
+      </span>
+
+      <span className="text-slate-500">
+        vs last week
+      </span>
+    </>
+  )}
+</div>
     </motion.div>
   );
 }

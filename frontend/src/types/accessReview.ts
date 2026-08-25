@@ -4,6 +4,7 @@ export type GovernanceAction = {
   title: string;
   description: string;
 };
+
 export interface AccessReview {
   completedReviews: number;
   pendingReviews: number;
