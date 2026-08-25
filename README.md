@@ -1,223 +1,232 @@
-# 🛡️ IdentityForge AI
+# IdentityForge AI
 
-> AI-Powered Identity & Access Management Security Platform
+> **AI-Powered Identity & Access Management Security Platform**
 
-**Live Demo:** https://ai-iam-copilot.vercel.app
-**Backend API:** https://ai-iam-copilot-api.onrender.com
-**API Documentation:** https://ai-iam-copilot-api.onrender.com/docs
+IdentityForge AI is a production-ready IAM security platform that brings together identity visibility, access governance, privileged access monitoring, risk intelligence, analytics, and an AI-powered IAM Copilot in a single web application.
+
+## Live Application
+
+- **Frontend:** https://ai-iam-copilot.vercel.app
+- **Backend API:** https://ai-iam-copilot-api.onrender.com
+- **API Documentation:** https://ai-iam-copilot-api.onrender.com/docs
+
+---
 
 ## Overview
 
-**IdentityForge AI** is a full-stack cybersecurity and Identity & Access Management (IAM) platform designed to bring identity governance, access control, privileged access monitoring, risk intelligence, analytics, and AI-assisted security analysis into a unified enterprise experience.
+IdentityForge AI was built as a hands-on Identity and Access Management portfolio project focused on practical IAM security workflows.
 
-The platform combines a modern **React + TypeScript frontend** with a **FastAPI + Python backend** and is deployed publicly using **Vercel** and **Render**.
+The platform demonstrates how identity, access, governance, privileged-account, risk, and analytics data can be presented through a modern security dashboard and exposed through REST APIs for an AI-assisted IAM experience.
 
-The project demonstrates how IAM security workflows can be presented through a centralized security operations experience rather than isolated administrative screens.
+The project combines:
+
+- Identity lifecycle visibility
+- Access governance
+- Privileged access monitoring
+- Role and permission analysis
+- Identity risk intelligence
+- Access reviews
+- Security activity monitoring
+- IAM analytics
+- AI-assisted IAM investigation
+
+---
 
 ## Why IdentityForge AI?
 
-Enterprise IAM teams need visibility into:
+Modern IAM teams need more than user provisioning. They need visibility into:
 
-* who has access
-* which accounts are privileged
-* where excessive access exists
-* which identities represent elevated risk
-* which access reviews require attention
-* how roles and permissions affect governance
-* where security teams should prioritize investigation
+- Who has access
+- Which identities are privileged
+- Which accounts present the highest risk
+- Where excessive access exists
+- Which access reviews require attention
+- Which identities or roles should be investigated first
 
-IdentityForge AI brings these signals together into a single platform with an AI-assisted security interface.
+IdentityForge AI demonstrates these concepts in a unified, recruiter-friendly security platform.
 
-## Key Capabilities
-
-### Identity Management
-
-Centralized identity inventory with identity status, departments, privilege indicators, risk levels, access counts, and security intelligence.
-
-### Access Control
-
-Visibility into access assignments, privileged access, high-risk access, and excessive access conditions.
-
-### Access Reviews
-
-Governance-oriented access review visibility with review status, pending reviews, overdue reviews, and review intelligence.
-
-### Privileged Access
-
-Dedicated privileged identity inventory with:
-
-* risk severity
-* risk scores
-* MFA status
-* active/inactive state
-* last-access visibility
-* security-focused prioritization
-
-### Role & Permission Governance
-
-Role inventory with:
-
-* role descriptions
-* user counts
-* permission counts
-* risk levels
-* role status
-
-### Risk Intelligence
-
-Security-focused risk visibility across identities and access activity.
-
-### Activity Monitoring
-
-Centralized identity and security activity visibility for operational monitoring and investigation.
-
-### Analytics
-
-Identity and access analytics presented through an enterprise security dashboard.
-
-### AI Copilot
-
-AI-assisted IAM analysis for security questions, identity insights, and governance-oriented recommendations.
-
-### Security Configuration
-
-Environment-based frontend API configuration and environment-driven backend CORS configuration for deployment flexibility.
-
-## Application Modules
-
-The current platform includes:
-
-* Dashboard
-* Identities
-* Access Control
-* Access Reviews
-* Privileged Access
-* Roles
-* Risk Intelligence
-* Activity
-* Analytics
-* AI Confidence
-* AI Copilot
-* Settings
+---
 
 ## Architecture
 
+![IdentityForge AI System Architecture](screenshots/Architecture.png)
+
+### Production Architecture
+
 ```text
-                         ┌─────────────────────────┐
-                         │       End User          │
-                         │      Web Browser        │
-                         └────────────┬────────────┘
-                                      │
-                                    HTTPS
-                                      │
-                                      ▼
-                         ┌─────────────────────────┐
-                         │        Vercel           │
-                         │ React + TypeScript +     │
-                         │ Vite Frontend            │
-                         └────────────┬────────────┘
-                                      │
-                                VITE_API_URL
-                                      │
-                                      ▼
-                         ┌─────────────────────────┐
-                         │        Render           │
-                         │ FastAPI + Python API    │
-                         │ Uvicorn                 │
-                         └────────────┬────────────┘
-                                      │
-                    ┌─────────────────┼─────────────────┐
-                    │                 │                 │
-                    ▼                 ▼                 ▼
-              IAM Services      Security Services   AI Services
-                    │                 │                 │
-                    ▼                 ▼                 ▼
-             Identity & Access   Risk / Reviews    AI Copilot
+User / Browser
+      │
+      ▼
+Vercel
+React + TypeScript + Vite
+      │
+      │ HTTPS / VITE_API_URL
+      ▼
+Render
+FastAPI + Python + Uvicorn
+      │
+      ├── Identity Intelligence
+      ├── Access Control
+      ├── Access Reviews
+      ├── Privileged Access
+      ├── Roles
+      ├── Risk Intelligence
+      ├── Activity
+      ├── Analytics
+      ├── Settings
+      └── AI Copilot
 ```
+
+The frontend uses environment-based API configuration through `VITE_API_URL`, while the backend exposes FastAPI REST endpoints and uses CORS configuration for approved frontend origins.
+
+---
+
+## Product Screenshots
+
+### Dashboard
+
+![IdentityForge AI Dashboard](screenshots/dashboard.png)
+
+The dashboard provides a consolidated view of identity, governance, risk, activity, and security metrics.
+
+### Identities
+
+![IdentityForge AI Identities](screenshots/identities.png)
+
+The identities module provides visibility into users, status, privilege level, access count, department, and identity risk.
+
+### Privileged Access
+
+![IdentityForge AI Privileged Access](screenshots/privileged-access.png)
+
+The privileged access module highlights sensitive accounts and helps identify high-risk privileged identities requiring investigation.
+
+### AI Copilot
+
+![IdentityForge AI AI Copilot](screenshots/ai-copilot.png)
+
+The AI Copilot accepts IAM-focused security questions and returns contextual responses based on the platform's identity and access data.
+
+---
+
+## Core Capabilities
+
+### Identity Intelligence
+
+- Identity inventory
+- User status visibility
+- Department-level context
+- Privileged identity identification
+- Access-count visibility
+- Risk-level classification
+
+### Access Control
+
+- Access-control inventory
+- Privileged access filtering
+- High-risk access identification
+- Excessive access detection
+- Least-privilege focused visibility
+
+### Access Reviews
+
+- Governance review visibility
+- Review status tracking
+- Risk-based review prioritization
+- Audit-readiness support
+
+### Privileged Access
+
+- Privileged identity monitoring
+- Risk scoring
+- MFA visibility
+- Account status tracking
+- Investigation prioritization
+
+### Roles
+
+- Role inventory
+- Permission visibility
+- Risk-focused role analysis
+- Role governance support
+
+### Risk Intelligence
+
+- Identity risk visibility
+- Risk prioritization
+- High-risk identity identification
+- IAM security insights
+
+### Activity
+
+- Security and identity activity visibility
+- Operational monitoring
+- IAM event presentation
+
+### Analytics
+
+- Identity and access metrics
+- Governance insights
+- Security trend visibility
+- Dashboard-driven analysis
+
+### AI Copilot
+
+The AI Copilot provides an IAM-focused conversational interface for investigating identity and access data.
+
+Example questions include:
+
+```text
+Which privileged identities are currently the highest risk?
+```
+
+```text
+Which privileged accounts have MFA disabled?
+```
+
+```text
+Which identities have excessive access?
+```
+
+```text
+Which access reviews require immediate attention?
+```
+
+```text
+Identify the top identity security risks in the current environment.
+```
+
+---
 
 ## Technology Stack
 
 ### Frontend
 
-* React
-* TypeScript
-* Vite
-* Modern responsive UI
-* Environment-based API configuration
+- React
+- TypeScript
+- Vite
+- REST API integration
+- Environment-based API configuration
+- Responsive security dashboard UI
 
 ### Backend
 
-* Python
-* FastAPI
-* Uvicorn
-* Pydantic
-* REST APIs
-* Environment-based configuration
-* CORS middleware
+- Python
+- FastAPI
+- Uvicorn
+- Pydantic
+- REST API architecture
+- CORS middleware
+- Service-oriented backend structure
 
-### Engineering & Deployment
+### Deployment
 
-* Git / GitHub
-* Vercel
-* Render
-* PowerShell
-* npm
-* Python virtual environment
+- **Frontend:** Vercel
+- **Backend:** Render
+- **Source Control:** GitHub
+- **Environment Configuration:** Vercel and Render environment variables
 
-## Production Deployment
-
-### Frontend
-
-Hosted on **Vercel**:
-
-https://ai-iam-copilot.vercel.app
-
-Production API configuration uses:
-
-```env
-VITE_API_URL=https://ai-iam-copilot-api.onrender.com
-```
-
-### Backend
-
-Hosted on **Render**:
-
-https://ai-iam-copilot-api.onrender.com
-
-The backend runs FastAPI with:
-
-```text
-uvicorn app.main:app --host 0.0.0.0 --port $PORT
-```
-
-Health endpoint:
-
-```text
-GET /health
-```
-
-API documentation:
-
-```text
-GET /docs
-```
-
-## Security & IAM Concepts Demonstrated
-
-IdentityForge AI demonstrates practical IAM and cybersecurity concepts including:
-
-* Identity governance
-* Role-based access control (RBAC)
-* Privileged access monitoring
-* Access reviews
-* Excessive access detection
-* Risk-based identity prioritization
-* MFA visibility
-* Security activity monitoring
-* Least-privilege-oriented analysis
-* Environment-based configuration
-* Controlled CORS configuration
-* Production API/frontend separation
+---
 
 ## Project Structure
 
@@ -227,13 +236,13 @@ AI-IAM-Copilot/
 ├── backend/
 │   ├── app/
 │   │   ├── api/
-│   │   ├── core/
 │   │   ├── data/
 │   │   ├── models/
 │   │   ├── routers/
 │   │   ├── schemas/
-│   │   └── services/
-│   ├── database/
+│   │   ├── services/
+│   │   └── main.py
+│   │
 │   └── requirements.txt
 │
 ├── frontend/
@@ -242,48 +251,78 @@ AI-IAM-Copilot/
 │   │   ├── hooks/
 │   │   ├── pages/
 │   │   ├── services/
-│   │   ├── styles/
-│   │   └── types/
-│   ├── public/
-│   ├── package.json
-│   └── vite.config.ts
+│   │   ├── types/
+│   │   └── App.tsx
+│   │
+│   ├── .env.production.example
+│   └── package.json
+│
+├── screenshots/
+│   ├── Architecture.png
+│   ├── dashboard.png
+│   ├── identities.png
+│   ├── privileged-access.png
+│   └── ai-copilot.png
 │
 ├── docs/
 ├── infrastructure/
 ├── scripts/
-├── screenshots/
 ├── tests/
 ├── CHANGELOG.md
 └── README.md
 ```
 
+---
+
+## Key API Endpoints
+
+Examples of available backend endpoints include:
+
+```text
+GET  /health
+GET  /dashboard/
+GET  /activities/
+GET  /identities
+GET  /access-control
+GET  /access-control/privileged
+GET  /access-control/high-risk
+GET  /access-control/excessive
+GET  /roles/
+GET  /privileged-access/
+GET  /analytics/
+GET  /settings/
+POST /ai/copilot
+```
+
+Interactive API documentation is available through FastAPI Swagger UI:
+
+```text
+https://ai-iam-copilot-api.onrender.com/docs
+```
+
+---
+
 ## Local Development
 
 ### Backend
 
+From the project root:
+
 ```powershell
 cd backend
-
-# Activate the virtual environment
 .\.venv\Scripts\Activate.ps1
-
-# Start FastAPI
-uvicorn app.main:app --reload
+uvicorn app.main:app --host 0.0.0.0 --port 8000
 ```
 
-Backend:
+The backend will be available at:
 
 ```text
-http://127.0.0.1:8000
-```
-
-Health check:
-
-```text
-http://127.0.0.1:8000/health
+http://localhost:8000
 ```
 
 ### Frontend
+
+Open another terminal:
 
 ```powershell
 cd frontend
@@ -291,126 +330,148 @@ npm install
 npm run dev
 ```
 
-Frontend:
+The frontend will typically be available at:
 
 ```text
 http://localhost:5173
 ```
 
-Development API configuration:
+---
 
-```env
+## Environment Configuration
+
+### Frontend
+
+Local development can use:
+
+```text
 VITE_API_URL=http://localhost:8000
 ```
 
-## Production Build
-
-Create a production frontend build with:
-
-```powershell
-cd frontend
-npm run build
-```
-
-The generated production assets are written to:
+Production uses the Vercel environment variable:
 
 ```text
-frontend/dist/
+VITE_API_URL=https://ai-iam-copilot-api.onrender.com
 ```
 
-## API Examples
-
-### Health
-
-```http
-GET /health
-```
-
-### Identities
-
-```http
-GET /identities
-```
-
-### Roles
-
-```http
-GET /roles/
-```
-
-### Privileged Access
-
-```http
-GET /privileged-access/
-```
-
-### API Documentation
+The repository contains only a safe example file:
 
 ```text
-/docs
+frontend/.env.production.example
 ```
 
-## Current Status
+### Backend
 
-**Production deployment: LIVE ✅**
+The backend uses environment-based CORS configuration:
 
-The application has been validated through:
+```text
+BACKEND_CORS_ORIGINS=https://ai-iam-copilot.vercel.app
+```
 
-* frontend production build
-* backend API verification
-* live Render deployment
-* live Vercel deployment
-* browser smoke testing
-* API integration testing
-* production CORS validation
+Sensitive environment files are excluded from Git through `.gitignore`.
 
-## Roadmap
+---
 
-The original application-building roadmap has been substantially completed.
+## Production Security & Repository Hygiene
 
-### Next focus
+The production repository has been checked for accidental secret exposure using:
 
-* Portfolio refinement
-* Architecture documentation
-* Production screenshots
-* Performance optimization
-* Additional IAM integrations
-* Enterprise identity-provider integrations
-* Automated testing expansion
-* Additional security controls
+- Tracked sensitive-file review
+- `.env` verification
+- Source-code secret-pattern scanning
+- Git-history sensitive-file review
+- `.gitignore` validation
+- Gitleaks Git-history scanning
+
+No secret leaks were detected during the final repository security checkpoint.
+
+---
+
+## IAM & Security Concepts Demonstrated
+
+IdentityForge AI demonstrates practical concepts relevant to IAM and cybersecurity roles, including:
+
+- Identity governance
+- Least privilege
+- Privileged access management
+- Role-based access control concepts
+- Access reviews
+- Access-risk identification
+- Identity-risk prioritization
+- MFA visibility
+- Excessive-access detection
+- Audit readiness
+- Security analytics
+- IAM investigation workflows
+- Secure environment configuration
+- REST API security integration
+
+---
+
+## Production Status
+
+```text
+Frontend Deployment        LIVE
+Backend Deployment         LIVE
+Dashboard                  Operational
+Identities                 Operational
+Access Control             Operational
+Privileged Access          Operational
+Access Reviews             Operational
+Roles                      Operational
+Risk Intelligence          Operational
+Activity                   Operational
+Analytics                  Operational
+AI Copilot                 Operational
+Settings                   Operational
+```
+
+---
 
 ## Future Enhancements
 
 Potential future extensions include:
 
-* SailPoint integration
-* Microsoft Entra ID / Azure integration
-* Okta integration
-* Real authentication and authorization
-* Persistent production database
-* Policy-driven access recommendations
-* Automated remediation workflows
-* Audit/export capabilities
-* Advanced RBAC analytics
-* CI/CD security checks
-* Containerized deployment
+- Microsoft Entra ID integration
+- SailPoint integration
+- Okta integration
+- SCIM-based provisioning
+- Authentication and authorization
+- Persistent database integration
+- Policy-based access decisions
+- Automated remediation workflows
+- Advanced access-certification workflows
+- SIEM integration
+- Identity threat detection
+- Cloud-native deployment improvements
+- Automated testing and CI/CD enhancements
+
+---
 
 ## Portfolio Value
 
-IdentityForge AI demonstrates hands-on experience across:
+IdentityForge AI demonstrates the ability to combine IAM security concepts with practical software engineering and production deployment.
 
-**IAM + Cybersecurity + Full-Stack Development + AI + Cloud Deployment**
+The project highlights experience across:
 
-The project combines security-focused engineering concepts with a real deployed application rather than a purely local proof of concept.
+- Identity and Access Management
+- Identity governance
+- Privileged access security
+- Access-risk analysis
+- REST APIs
+- Python / FastAPI
+- React / TypeScript
+- Production troubleshooting
+- Secure configuration
+- Cloud deployment
+- AI-assisted IAM workflows
+
+---
 
 ## Author
 
 **Suvarna**
 
-Cybersecurity | IAM | Identity Governance | SailPoint | Python | React | AI
+Cybersecurity | Identity & Access Management | IAM Security | Python | FastAPI | React | TypeScript
 
----
-
-## License
-
-This project is intended as a personal cybersecurity/IAM portfolio project.
+GitHub: https://github.com/suvarna-art
