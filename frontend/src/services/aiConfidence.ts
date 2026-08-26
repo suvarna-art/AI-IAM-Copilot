@@ -7,5 +7,5 @@ export interface AIConfidenceData {
 }
 
 export async function getAIConfidence(): Promise<AIConfidenceData> {
-  return apiFetch<AIConfidenceData>("/ai-confidence/");
+  return apiFetch<AIConfidenceData>("/ai-confidence");
 }
