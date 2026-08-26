@@ -10,9 +10,15 @@ import {
   Activity,
   BarChart3,
   Settings,
+  X,
 } from "lucide-react";
 
 import { NavLink } from "react-router-dom";
+
+interface SidebarProps {
+  mobileOpen: boolean;
+  onClose: () => void;
+}
 
 const navigation = [
   {
@@ -31,9 +37,9 @@ const navigation = [
     icon: ShieldCheck,
   },
   {
-  name: "Privileged Access",
-  path: "/privileged-access",
-  icon: LockKeyhole,
+    name: "Privileged Access",
+    path: "/privileged-access",
+    icon: LockKeyhole,
   },
   {
     name: "Access Reviews",
@@ -72,72 +78,103 @@ const navigation = [
   },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({
+  mobileOpen,
+  onClose,
+}: SidebarProps) {
   return (
-    <aside className="flex w-64 shrink-0 flex-col border-r border-slate-800 bg-slate-950">
+    <>
+      {/* Mobile overlay */}
+      {mobileOpen && (
+        <button
+          type="button"
+          aria-label="Close navigation overlay"
+          onClick={onClose}
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
+        />
+      )}
 
-      {/* BRAND */}
-      <div className="border-b border-slate-800 px-6 py-7">
-        <h1 className="text-xl font-bold tracking-tight text-cyan-400">
-          IdentityForge AI
-        </h1>
+      <aside
+        className={`
+          fixed inset-y-0 left-0 z-50 flex w-64 shrink-0 flex-col
+          border-r border-slate-800 bg-slate-950
+          transition-transform duration-300 ease-in-out
+          lg:translate-x-0
+          ${
+            mobileOpen
+              ? "translate-x-0"
+              : "-translate-x-full"
+          }
+        `}
+      >
+        {/* BRAND */}
+        <div className="flex items-start justify-between border-b border-slate-800 px-6 py-6">
+          <div>
+            <h1 className="text-xl font-bold tracking-tight text-cyan-400">
+              IdentityForge AI
+            </h1>
 
-        <p className="mt-1 text-xs text-slate-500">
-          Enterprise Identity Intelligence
-        </p>
-      </div>
+            <p className="mt-1 text-xs text-slate-500">
+              Enterprise Identity Intelligence
+            </p>
+          </div>
 
-      {/* NAVIGATION */}
-      <nav className="flex-1 space-y-2 px-4 py-6">
-
-        {navigation.map((item) => {
-          const Icon = item.icon;
-
-          return (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              end={item.path === "/"}
-              className={({ isActive }) =>
-                [
-                  "flex items-center gap-4 rounded-xl px-4 py-3",
-                  "text-sm font-medium transition-all duration-200",
-                  isActive
-                    ? "bg-cyan-500 text-white shadow-lg shadow-cyan-500/20"
-                    : "text-slate-400 hover:bg-slate-900 hover:text-white",
-                ].join(" ")
-              }
-            >
-              <Icon size={19} />
-
-              <span>{item.name}</span>
-            </NavLink>
-          );
-        })}
-
-      </nav>
-
-      {/* SECURITY SCORE */}
-      <div className="border-t border-slate-800 p-4">
-
-        <div className="rounded-xl bg-slate-900/80 p-4">
-
-          <p className="text-xs text-slate-500">
-            Security Score
-          </p>
-
-          <p className="mt-2 text-2xl font-bold text-emerald-400">
-            94%
-          </p>
-
-          <p className="mt-1 text-[11px] text-slate-500">
-            Excellent security posture
-          </p>
-
+          <button
+            type="button"
+            aria-label="Close navigation"
+            onClick={onClose}
+            className="rounded-lg p-2 text-slate-400 transition hover:bg-slate-900 hover:text-white lg:hidden"
+          >
+            <X size={20} />
+          </button>
         </div>
 
-      </div>
+        {/* NAVIGATION */}
+        <nav className="flex-1 space-y-2 overflow-y-auto px-4 py-6">
+          {navigation.map((item) => {
+            const Icon = item.icon;
 
-    </aside>
+            return (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                end={item.path === "/"}
+                onClick={onClose}
+                className={({ isActive }) =>
+                  [
+                    "flex items-center gap-4 rounded-xl px-4 py-3",
+                    "text-sm font-medium transition-all duration-200",
+                    isActive
+                      ? "bg-cyan-500 text-white shadow-lg shadow-cyan-500/20"
+                      : "text-slate-400 hover:bg-slate-900 hover:text-white",
+                  ].join(" ")
+                }
+              >
+                <Icon size={19} />
+
+                <span>{item.name}</span>
+              </NavLink>
+            );
+          })}
+        </nav>
+
+        {/* SECURITY SCORE */}
+        <div className="border-t border-slate-800 p-4">
+          <div className="rounded-xl bg-slate-900/80 p-4">
+            <p className="text-xs text-slate-500">
+              Security Score
+            </p>
+
+            <p className="mt-2 text-2xl font-bold text-emerald-400">
+              94%
+            </p>
+
+            <p className="mt-1 text-[11px] text-slate-500">
+              Excellent security posture
+            </p>
+          </div>
+        </div>
+      </aside>
+    </>
   );
 }

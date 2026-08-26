@@ -5,6 +5,7 @@ import {
   ClipboardCheck,
   KeyRound,
   LogOut,
+  Menu,
   Search,
   Settings,
   ShieldAlert,
@@ -32,6 +33,7 @@ import {
 interface HeaderProps {
   title: string;
   subtitle: string;
+  onMenuClick: () => void;
 }
 
 type NotificationItem = {
@@ -103,6 +105,7 @@ const searchableModules = [
 export default function Header({
   title,
   subtitle,
+  onMenuClick,
 }: HeaderProps) {
   const navigate = useNavigate();
 
@@ -135,10 +138,6 @@ export default function Header({
 
   const searchRef =
     useRef<HTMLDivElement | null>(null);
-
-  /* =========================================================
-     LOAD IAM SECURITY NOTIFICATIONS
-  ========================================================= */
 
   useEffect(() => {
     async function loadNotifications() {
@@ -220,10 +219,6 @@ export default function Header({
     loadNotifications();
   }, []);
 
-  /* =========================================================
-     CLOSE MENUS WHEN CLICKING OUTSIDE
-  ========================================================= */
-
   useEffect(() => {
     function handleOutsideClick(
       event: MouseEvent
@@ -269,9 +264,7 @@ export default function Header({
   const unreadCount =
     notifications.filter(
       (notification) =>
-        !readNotifications.has(
-          notification.id
-        )
+        !readNotifications.has(notification.id)
     ).length;
 
   const filteredModules = useMemo(() => {
@@ -284,12 +277,8 @@ export default function Header({
 
     return searchableModules.filter(
       (module) =>
-        module.label
-          .toLowerCase()
-          .includes(query) ||
-        module.description
-          .toLowerCase()
-          .includes(query)
+        module.label.toLowerCase().includes(query) ||
+        module.description.toLowerCase().includes(query)
     );
   }, [searchQuery]);
 
@@ -329,35 +318,43 @@ export default function Header({
   }
 
   return (
-    <header className="sticky top-0 z-30 flex h-[72px] shrink-0 items-center justify-between border-b border-slate-800/80 bg-[#0b1224]/95 px-6 backdrop-blur">
+    <header className="sticky top-0 z-30 flex min-h-[64px] shrink-0 items-center justify-between border-b border-slate-800/80 bg-[#0b1224]/95 px-3 py-2 backdrop-blur sm:px-4 lg:h-[72px] lg:px-6">
 
-      {/* Page identity */}
+      {/* Left side */}
+      <div className="flex min-w-0 items-center gap-3">
 
-      <div className="min-w-0">
-        <h1 className="truncate text-xl font-bold tracking-tight text-white">
-          {title}
-        </h1>
+        {/* Mobile menu */}
+        <button
+          type="button"
+          aria-label="Open navigation"
+          onClick={onMenuClick}
+          className="rounded-xl p-2 text-slate-400 transition hover:bg-slate-800/70 hover:text-white lg:hidden"
+        >
+          <Menu size={22} />
+        </button>
 
-        <p className="truncate text-xs text-slate-400">
-          {subtitle}
-        </p>
+        {/* Page identity */}
+        <div className="min-w-0">
+          <h1 className="truncate text-base font-bold tracking-tight text-white sm:text-lg lg:text-xl">
+            {title}
+          </h1>
+
+          <p className="hidden truncate text-xs text-slate-400 sm:block">
+            {subtitle}
+          </p>
+        </div>
       </div>
 
       {/* Header actions */}
-
-      <div className="flex items-center gap-3">
+      <div className="flex shrink-0 items-center gap-1 sm:gap-2 lg:gap-3">
 
         {/* System status */}
-
-        <div className="hidden items-center gap-2 rounded-xl border border-emerald-500/10 bg-emerald-500/10 px-3 py-2 text-xs font-medium text-emerald-400 sm:flex">
+        <div className="hidden items-center gap-2 rounded-xl border border-emerald-500/10 bg-emerald-500/10 px-3 py-2 text-xs font-medium text-emerald-400 xl:flex">
           <span className="h-2 w-2 rounded-full bg-emerald-400" />
           System Healthy
         </div>
 
-        {/* =====================================================
-            SEARCH
-        ===================================================== */}
-
+        {/* SEARCH */}
         <div
           ref={searchRef}
           className="relative"
@@ -380,7 +377,7 @@ export default function Header({
           </button>
 
           {searchOpen && (
-            <div className="absolute right-0 top-12 z-50 w-[360px] overflow-hidden rounded-2xl border border-slate-700 bg-[#0f172a] shadow-2xl shadow-black/40">
+            <div className="fixed left-3 right-3 top-[72px] z-50 overflow-hidden rounded-2xl border border-slate-700 bg-[#0f172a] shadow-2xl shadow-black/40 sm:absolute sm:left-auto sm:right-0 sm:top-12 sm:w-[360px]">
 
               <div className="border-b border-slate-800 p-4">
                 <div className="flex items-center gap-3 rounded-xl border border-slate-700 bg-slate-950 px-3 py-2">
@@ -450,10 +447,7 @@ export default function Header({
           )}
         </div>
 
-        {/* =====================================================
-            NOTIFICATIONS
-        ===================================================== */}
-
+        {/* NOTIFICATIONS */}
         <div
           ref={notificationRef}
           className="relative"
@@ -482,15 +476,15 @@ export default function Header({
           </button>
 
           {notificationsOpen && (
-            <div className="absolute right-0 top-12 z-50 w-[380px] overflow-hidden rounded-2xl border border-slate-700 bg-[#0f172a] shadow-2xl shadow-black/40">
+            <div className="fixed left-3 right-3 top-[72px] z-50 overflow-hidden rounded-2xl border border-slate-700 bg-[#0f172a] shadow-2xl shadow-black/40 sm:absolute sm:left-auto sm:right-0 sm:top-12 sm:w-[380px]">
 
-              <div className="flex items-center justify-between border-b border-slate-800 px-5 py-4">
-                <div>
-                  <h3 className="font-semibold text-white">
+              <div className="flex items-center justify-between border-b border-slate-800 px-4 py-4 sm:px-5">
+                <div className="min-w-0">
+                  <h3 className="truncate font-semibold text-white">
                     Security Notifications
                   </h3>
 
-                  <p className="mt-1 text-xs text-slate-400">
+                  <p className="mt-1 hidden text-xs text-slate-400 sm:block">
                     IAM governance and privileged access alerts
                   </p>
                 </div>
@@ -507,7 +501,7 @@ export default function Header({
                 )}
               </div>
 
-              <div className="max-h-[420px] overflow-y-auto p-2">
+              <div className="max-h-[60vh] overflow-y-auto p-2 sm:max-h-[420px]">
 
                 {notificationsLoading ? (
                   <div className="px-4 py-8 text-center text-sm text-slate-400">
@@ -602,10 +596,7 @@ export default function Header({
           )}
         </div>
 
-        {/* =====================================================
-            PROFILE
-        ===================================================== */}
-
+        {/* PROFILE */}
         <div
           ref={profileRef}
           className="relative"
@@ -624,11 +615,11 @@ export default function Header({
             }}
             className="rounded-xl p-2 text-cyan-400 transition hover:bg-slate-800/70"
           >
-            <UserCircle size={28} />
+            <UserCircle size={26} />
           </button>
 
           {profileOpen && (
-            <div className="absolute right-0 top-12 z-50 w-72 overflow-hidden rounded-2xl border border-slate-700 bg-[#0f172a] shadow-2xl shadow-black/40">
+            <div className="fixed left-3 right-3 top-[72px] z-50 overflow-hidden rounded-2xl border border-slate-700 bg-[#0f172a] shadow-2xl shadow-black/40 sm:absolute sm:left-auto sm:right-0 sm:top-12 sm:w-72">
 
               <div className="border-b border-slate-800 p-5">
                 <div className="flex items-center gap-3">
