@@ -88,3 +88,23 @@ export interface PermissionDriftExemption {
   status: string;
   created_at: string;
 }
+
+export interface CreatePermissionDriftExemptionRequest {
+  user_id: string | null;
+  account_type: string | null;
+  permission: string | null;
+
+  exemption_type: string;
+  reason: string;
+  expected_frequency: string | null;
+
+  valid_from: string;
+  valid_until: string | null;
+
+  created_by: string;
+}
+
+export interface CreatePermissionDriftExemptionResponse {
+  message: string;
+  exemption: PermissionDriftExemption;
+}

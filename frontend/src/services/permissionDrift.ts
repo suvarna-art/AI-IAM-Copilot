@@ -1,6 +1,8 @@
 import { apiFetch } from "./api";
 
 import type {
+  CreatePermissionDriftExemptionRequest,
+  CreatePermissionDriftExemptionResponse,
   PermissionDriftExemption,
   PermissionDriftFinding,
   PermissionDriftSummary,
@@ -43,5 +45,18 @@ export async function getPermissionDriftExemptions():
   Promise<PermissionDriftExemption[]> {
   return apiFetch<PermissionDriftExemption[]>(
     "/permission-drift/exemptions"
+  );
+}
+
+
+export async function createPermissionDriftExemption(
+  request: CreatePermissionDriftExemptionRequest
+): Promise<CreatePermissionDriftExemptionResponse> {
+  return apiFetch<CreatePermissionDriftExemptionResponse>(
+    "/permission-drift/exemptions",
+    {
+      method: "POST",
+      body: JSON.stringify(request),
+    }
   );
 }

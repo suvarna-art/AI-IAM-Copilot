@@ -12,6 +12,7 @@ import {
 import { useEffect, useMemo, useState } from "react";
 
 import {
+  createPermissionDriftExemption,
   getPermissionDriftFindings,
   getPermissionDriftSummary,
 } from "../services/permissionDrift";
@@ -47,20 +48,48 @@ export default function PermissionDrift() {
   const [error, setError] =
     useState<string | null>(null);
 
+  const [exemptionOpen, setExemptionOpen] =
+    useState(false);
+
+  const [exemptionReason, setExemptionReason] =
+    useState("");
+
+  const [exemptionType, setExemptionType] =
+    useState("TEMPORARY_EXCEPTION");
+
+  const [expectedFrequency, setExpectedFrequency] =
+    useState("monthly");
+
+  const [validUntil, setValidUntil] =
+    useState("");
+
+  const [submittingExemption, setSubmittingExemption] =
+    useState(false);
+
+  const [actionMessage, setActionMessage] =
+    useState<string | null>(null);
+
+
+  async function refreshPermissionDrift() {
+    const [
+      summaryResult,
+      findingsResult,
+    ] = await Promise.all([
+      getPermissionDriftSummary(),
+      getPermissionDriftFindings(),
+    ]);
+
+    setSummary(summaryResult);
+    setFindings(findingsResult);
+
+    return findingsResult;
+  }
+
 
   useEffect(() => {
     async function loadPermissionDrift() {
       try {
-        const [
-          summaryResult,
-          findingsResult,
-        ] = await Promise.all([
-          getPermissionDriftSummary(),
-          getPermissionDriftFindings(),
-        ]);
-
-        setSummary(summaryResult);
-        setFindings(findingsResult);
+        await refreshPermissionDrift();
       } catch {
         setError(
           "Permission drift data is currently unavailable."
@@ -159,9 +188,159 @@ export default function PermissionDrift() {
   }
 
 
+  function openFinding(
+    finding: PermissionDriftFinding
+  ) {
+    setSelectedFinding(finding);
+
+    setExemptionOpen(false);
+    setActionMessage(null);
+    setExemptionReason("");
+    setExemptionType(
+      "TEMPORARY_EXCEPTION"
+    );
+    setExpectedFrequency(
+      "monthly"
+    );
+    setValidUntil("");
+  }
+
+
+  function closeFinding() {
+    if (submittingExemption) {
+      return;
+    }
+
+    setSelectedFinding(null);
+    setExemptionOpen(false);
+    setActionMessage(null);
+    setExemptionReason("");
+    setValidUntil("");
+  }
+
+
+  async function handleCreateExemption() {
+    if (!selectedFinding) {
+      return;
+    }
+
+    if (!exemptionReason.trim()) {
+      setActionMessage(
+        "Please provide a business justification."
+      );
+
+      return;
+    }
+
+    if (!validUntil) {
+      setActionMessage(
+        "Please select an exemption expiry date."
+      );
+
+      return;
+    }
+
+    const expiry = new Date(
+      `${validUntil}T23:59:59`
+    );
+
+    if (
+      Number.isNaN(
+        expiry.getTime()
+      )
+    ) {
+      setActionMessage(
+        "Please provide a valid expiry date."
+      );
+
+      return;
+    }
+
+    const now = new Date();
+
+    if (expiry <= now) {
+      setActionMessage(
+        "The exemption expiry date must be in the future."
+      );
+
+      return;
+    }
+
+    setSubmittingExemption(true);
+    setActionMessage(null);
+
+    try {
+      const response =
+        await createPermissionDriftExemption({
+          user_id:
+            selectedFinding.user_id,
+
+          account_type:
+            selectedFinding.account_type,
+
+          permission:
+            selectedFinding.permission,
+
+          exemption_type:
+            exemptionType,
+
+          reason:
+            exemptionReason.trim(),
+
+          expected_frequency:
+            expectedFrequency || null,
+
+          valid_from:
+            now.toISOString(),
+
+          valid_until:
+            expiry.toISOString(),
+
+          created_by:
+            "IAM Administrator",
+        });
+
+      const updatedFindings =
+        await refreshPermissionDrift();
+
+      const updatedFinding =
+        updatedFindings.find(
+          (finding) =>
+            finding.user_id ===
+              selectedFinding.user_id &&
+            finding.permission ===
+              selectedFinding.permission
+        );
+
+      if (updatedFinding) {
+        setSelectedFinding(
+          updatedFinding
+        );
+      }
+
+      setActionMessage(
+        response.message
+      );
+
+      setExemptionOpen(false);
+      setExemptionReason("");
+      setValidUntil("");
+    } catch (error) {
+      setActionMessage(
+        error instanceof Error
+          ? error.message
+          : "Unable to create policy exemption."
+      );
+    } finally {
+      setSubmittingExemption(false);
+    }
+  }
+
+
   if (loading) {
     return (
       <div className="space-y-6">
+
         <div className="h-28 animate-pulse rounded-2xl border border-slate-800 bg-slate-900/70" />
 
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -176,6 +355,7 @@ export default function PermissionDrift() {
         </div>
 
         <div className="h-96 animate-pulse rounded-2xl border border-slate-800 bg-slate-900/70" />
+
       </div>
     );
   }
@@ -184,7 +364,9 @@ export default function PermissionDrift() {
   if (error) {
     return (
       <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-6">
+
         <div className="flex items-center gap-3">
+
           <AlertTriangle className="text-red-400" />
 
           <div>
@@ -196,7 +378,9 @@ export default function PermissionDrift() {
               {error}
             </p>
           </div>
+
         </div>
+
       </div>
     );
   }
@@ -207,10 +391,12 @@ export default function PermissionDrift() {
 
       {/* INTRODUCTION */}
       <section className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5 sm:p-6">
+
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
 
           <div>
             <div className="flex items-center gap-3">
+
               <div className="rounded-xl bg-cyan-500/10 p-2 text-cyan-400">
                 <ShieldAlert size={22} />
               </div>
@@ -224,10 +410,12 @@ export default function PermissionDrift() {
                   Compare assigned permissions against observed activity without modifying access.
                 </p>
               </div>
+
             </div>
           </div>
 
           <div className="rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3">
+
             <p className="text-xs uppercase tracking-wide text-slate-500">
               Analysis Window
             </p>
@@ -235,8 +423,11 @@ export default function PermissionDrift() {
             <p className="mt-1 font-semibold text-white">
               {summary?.analysis_window_days ?? 14} days
             </p>
+
           </div>
+
         </div>
+
       </section>
 
 
@@ -302,6 +493,7 @@ export default function PermissionDrift() {
 
       {/* FILTERS */}
       <section className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4">
+
         <div className="flex flex-col gap-3 md:flex-row">
 
           <FilterSelect
@@ -341,6 +533,7 @@ export default function PermissionDrift() {
           />
 
         </div>
+
       </section>
 
 
@@ -348,6 +541,7 @@ export default function PermissionDrift() {
       <section className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/60">
 
         <div className="border-b border-slate-800 px-5 py-4">
+
           <h3 className="font-semibold text-white">
             Permission Drift Findings
           </h3>
@@ -355,13 +549,17 @@ export default function PermissionDrift() {
           <p className="mt-1 text-xs text-slate-400">
             Showing {filteredFindings.length} of {findings.length} findings
           </p>
+
         </div>
 
         <div className="overflow-x-auto">
-          <table className="min-w-[980px] w-full">
+
+          <table className="w-full min-w-[980px]">
 
             <thead className="bg-slate-950/60">
+
               <tr className="text-left text-xs uppercase tracking-wide text-slate-500">
+
                 <th className="px-5 py-4">
                   Identity
                 </th>
@@ -393,17 +591,22 @@ export default function PermissionDrift() {
                 <th className="px-5 py-4">
                   Action
                 </th>
+
               </tr>
+
             </thead>
 
             <tbody>
+
               {filteredFindings.map(
                 (finding) => (
                   <tr
                     key={`${finding.user_id}-${finding.permission}`}
                     className="border-t border-slate-800/80 transition hover:bg-slate-800/30"
                   >
+
                     <td className="px-5 py-4">
+
                       <p className="text-sm font-semibold text-white">
                         {finding.user_name}
                       </p>
@@ -411,9 +614,11 @@ export default function PermissionDrift() {
                       <p className="mt-1 text-xs text-slate-500">
                         {finding.user_id}
                       </p>
+
                     </td>
 
                     <td className="px-5 py-4">
+
                       <p className="text-sm text-slate-200">
                         {finding.permission}
                       </p>
@@ -421,9 +626,11 @@ export default function PermissionDrift() {
                       <p className="mt-1 text-xs text-slate-500">
                         {finding.resource}
                       </p>
+
                     </td>
 
                     <td className="px-5 py-4 text-sm text-slate-300">
+
                       {finding.account_type}
 
                       {finding.privileged && (
@@ -431,6 +638,7 @@ export default function PermissionDrift() {
                           PRIVILEGED
                         </span>
                       )}
+
                     </td>
 
                     <td className="px-5 py-4 text-sm text-slate-300">
@@ -442,7 +650,9 @@ export default function PermissionDrift() {
                     </td>
 
                     <td className="px-5 py-4">
+
                       <div className="flex items-center gap-2">
+
                         <span
                           className={`font-bold ${getRiskClasses(
                             finding.raw_classification
@@ -454,10 +664,13 @@ export default function PermissionDrift() {
                         <span className="text-xs text-slate-500">
                           {finding.raw_classification}
                         </span>
+
                       </div>
+
                     </td>
 
                     <td className="px-5 py-4">
+
                       <span
                         className={`inline-flex rounded-lg border px-2.5 py-1 text-xs font-semibold ${getStatusClasses(
                           finding.final_status
@@ -468,13 +681,15 @@ export default function PermissionDrift() {
                           " "
                         )}
                       </span>
+
                     </td>
 
                     <td className="px-5 py-4">
+
                       <button
                         type="button"
                         onClick={() =>
-                          setSelectedFinding(
+                          openFinding(
                             finding
                           )
                         }
@@ -483,33 +698,40 @@ export default function PermissionDrift() {
                         <Eye size={15} />
                         View
                       </button>
+
                     </td>
+
                   </tr>
                 )
               )}
+
             </tbody>
+
           </table>
+
         </div>
 
       </section>
 
 
-      {/* FINDING DETAIL */}
+      {/* FINDING DETAIL MODAL */}
       {selectedFinding && (
         <div
           className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-0 backdrop-blur-sm sm:items-center sm:p-6"
-          onClick={() =>
-            setSelectedFinding(null)
-          }
+          onClick={closeFinding}
         >
+
           <div
             className="max-h-[90vh] w-full overflow-y-auto rounded-t-2xl border border-slate-700 bg-[#0f172a] p-5 shadow-2xl sm:max-w-2xl sm:rounded-2xl sm:p-6"
             onClick={(event) =>
               event.stopPropagation()
             }
           >
+
             <div className="flex items-start justify-between gap-4">
+
               <div>
+
                 <p className="text-xs uppercase tracking-wide text-cyan-400">
                   Permission Drift Evidence
                 </p>
@@ -521,19 +743,22 @@ export default function PermissionDrift() {
                 <p className="mt-1 text-sm text-slate-400">
                   {selectedFinding.permission}
                 </p>
+
               </div>
 
               <button
                 type="button"
-                onClick={() =>
-                  setSelectedFinding(null)
-                }
-                className="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-400 transition hover:text-white"
+                onClick={closeFinding}
+                disabled={submittingExemption}
+                className="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-400 transition hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Close
               </button>
+
             </div>
 
+
+            {/* DETAILS */}
             <div className="mt-6 grid gap-4 sm:grid-cols-2">
 
               <DetailItem
@@ -594,24 +819,34 @@ export default function PermissionDrift() {
 
             </div>
 
+
+            {/* EVIDENCE */}
             <div className="mt-6 rounded-xl border border-slate-800 bg-slate-950/70 p-4">
+
               <p className="text-xs uppercase tracking-wide text-slate-500">
                 Evidence
               </p>
 
               <p className="mt-3 text-sm leading-6 text-slate-300">
-                This permission was observed
-                {" "}
-                {selectedFinding.usage_count_14d}
-                {" "}
-                time(s) during the
-                {" "}
+                This permission was observed{" "}
+                {selectedFinding.usage_count_14d}{" "}
+                time(s) during the{" "}
                 {selectedFinding.analysis_window_days}-day
                 analysis window.
               </p>
 
+              {selectedFinding.last_used_at && (
+                <p className="mt-2 text-sm text-slate-400">
+                  Last observed use:{" "}
+                  {new Date(
+                    selectedFinding.last_used_at
+                  ).toLocaleString()}
+                </p>
+              )}
+
               {selectedFinding.exemption_applied && (
                 <div className="mt-4 rounded-xl border border-cyan-500/20 bg-cyan-500/10 p-4">
+
                   <p className="text-sm font-semibold text-cyan-400">
                     Active Exemption
                   </p>
@@ -619,19 +854,215 @@ export default function PermissionDrift() {
                   <p className="mt-2 text-sm leading-6 text-slate-300">
                     {selectedFinding.exemption_reason}
                   </p>
+
+                  {selectedFinding.expected_frequency && (
+                    <p className="mt-2 text-xs text-slate-400">
+                      Expected frequency:{" "}
+                      {selectedFinding.expected_frequency}
+                    </p>
+                  )}
+
                 </div>
               )}
+
             </div>
 
+
+            {/* CREATE EXEMPTION FORM */}
+            {exemptionOpen && (
+              <div className="mt-6 rounded-2xl border border-cyan-500/20 bg-cyan-500/5 p-4 sm:p-5">
+
+                <h4 className="font-semibold text-white">
+                  Create Policy Exemption
+                </h4>
+
+                <p className="mt-1 text-xs text-slate-400">
+                  Record a legitimate business exception without modifying access.
+                </p>
+
+                <div className="mt-5 grid gap-4 sm:grid-cols-2">
+
+                  <label>
+
+                    <span className="mb-2 block text-xs uppercase tracking-wide text-slate-500">
+                      Exemption Type
+                    </span>
+
+                    <select
+                      value={exemptionType}
+                      onChange={(event) =>
+                        setExemptionType(
+                          event.target.value
+                        )
+                      }
+                      className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2.5 text-sm text-white outline-none focus:border-cyan-500/50"
+                    >
+
+                      <option value="TEMPORARY_EXCEPTION">
+                        Temporary Exception
+                      </option>
+
+                      <option value="PERIODIC_TASK">
+                        Periodic Task
+                      </option>
+
+                      <option value="BUSINESS_EXCEPTION">
+                        Business Exception
+                      </option>
+
+                    </select>
+
+                  </label>
+
+
+                  <label>
+
+                    <span className="mb-2 block text-xs uppercase tracking-wide text-slate-500">
+                      Expected Frequency
+                    </span>
+
+                    <select
+                      value={expectedFrequency}
+                      onChange={(event) =>
+                        setExpectedFrequency(
+                          event.target.value
+                        )
+                      }
+                      className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2.5 text-sm text-white outline-none focus:border-cyan-500/50"
+                    >
+
+                      <option value="daily">
+                        Daily
+                      </option>
+
+                      <option value="weekly">
+                        Weekly
+                      </option>
+
+                      <option value="monthly">
+                        Monthly
+                      </option>
+
+                      <option value="quarterly">
+                        Quarterly
+                      </option>
+
+                      <option value="emergency_only">
+                        Emergency Only
+                      </option>
+
+                    </select>
+
+                  </label>
+
+                </div>
+
+
+                <label className="mt-4 block">
+
+                  <span className="mb-2 block text-xs uppercase tracking-wide text-slate-500">
+                    Business Justification
+                  </span>
+
+                  <textarea
+                    value={exemptionReason}
+                    onChange={(event) =>
+                      setExemptionReason(
+                        event.target.value
+                      )
+                    }
+                    rows={4}
+                    placeholder="Explain why this low-frequency or unused permission remains legitimate..."
+                    className="w-full resize-none rounded-xl border border-slate-700 bg-slate-950 px-3 py-3 text-sm text-white outline-none placeholder:text-slate-600 focus:border-cyan-500/50"
+                  />
+
+                </label>
+
+
+                <label className="mt-4 block">
+
+                  <span className="mb-2 block text-xs uppercase tracking-wide text-slate-500">
+                    Valid Until
+                  </span>
+
+                  <input
+                    type="date"
+                    value={validUntil}
+                    onChange={(event) =>
+                      setValidUntil(
+                        event.target.value
+                      )
+                    }
+                    className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2.5 text-sm text-white outline-none focus:border-cyan-500/50"
+                  />
+
+                </label>
+
+
+                <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+
+                  <button
+                    type="button"
+                    onClick={
+                      handleCreateExemption
+                    }
+                    disabled={
+                      submittingExemption
+                    }
+                    className="rounded-xl bg-cyan-500 px-4 py-3 text-sm font-semibold text-white transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {submittingExemption
+                      ? "Creating..."
+                      : "Confirm Exemption"}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setExemptionOpen(false);
+                      setActionMessage(null);
+                    }}
+                    disabled={
+                      submittingExemption
+                    }
+                    className="rounded-xl border border-slate-700 px-4 py-3 text-sm text-slate-300 transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    Cancel
+                  </button>
+
+                </div>
+
+              </div>
+            )}
+
+
+            {/* ACTION RESULT */}
+            {actionMessage && (
+              <div className="mt-4 rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-slate-300">
+                {actionMessage}
+              </div>
+            )}
+
+
+            {/* ADMIN ACTIONS */}
             <div className="mt-6 flex flex-col gap-3 sm:flex-row">
 
               <button
                 type="button"
-                disabled
-                title="Admin exemption creation will be added next"
-                className="rounded-xl border border-slate-700 px-4 py-3 text-sm font-medium text-slate-500"
+                onClick={() => {
+                  setActionMessage(null);
+                  setExemptionOpen(true);
+                }}
+                disabled={
+                  selectedFinding.final_status ===
+                  "EXEMPT"
+                }
+                className="rounded-xl border border-cyan-500/30 px-4 py-3 text-sm font-medium text-cyan-400 transition hover:bg-cyan-500/10 disabled:cursor-not-allowed disabled:border-slate-700 disabled:text-slate-500"
               >
-                Create Exemption
+                {selectedFinding.final_status ===
+                "EXEMPT"
+                  ? "Already Exempt"
+                  : "Create Exemption"}
               </button>
 
               <button
@@ -653,7 +1084,9 @@ export default function PermissionDrift() {
               </button>
 
             </div>
+
           </div>
+
         </div>
       )}
 
@@ -673,9 +1106,11 @@ function SummaryCard({
 }) {
   return (
     <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5">
+
       <div className="flex items-center justify-between">
 
         <div>
+
           <p className="text-xs uppercase tracking-wide text-slate-500">
             {title}
           </p>
@@ -683,6 +1118,7 @@ function SummaryCard({
           <p className="mt-3 text-3xl font-bold text-white">
             {value}
           </p>
+
         </div>
 
         <div className="rounded-xl bg-cyan-500/10 p-3 text-cyan-400">
@@ -690,6 +1126,7 @@ function SummaryCard({
         </div>
 
       </div>
+
     </div>
   );
 }
@@ -712,6 +1149,7 @@ function MetricCard({
       </div>
 
       <div>
+
         <p className="text-xs text-slate-500">
           {label}
         </p>
@@ -719,6 +1157,7 @@ function MetricCard({
         <p className="mt-1 text-lg font-bold text-white">
           {value}
         </p>
+
       </div>
 
     </div>
@@ -739,6 +1178,7 @@ function FilterSelect({
 }) {
   return (
     <label className="flex-1">
+
       <span className="mb-2 block text-xs uppercase tracking-wide text-slate-500">
         {label}
       </span>
@@ -746,7 +1186,9 @@ function FilterSelect({
       <select
         value={value}
         onChange={(event) =>
-          onChange(event.target.value)
+          onChange(
+            event.target.value
+          )
         }
         className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2.5 text-sm text-slate-200 outline-none transition focus:border-cyan-500/50"
       >
@@ -764,6 +1206,7 @@ function FilterSelect({
           )
         )}
       </select>
+
     </label>
   );
 }
@@ -778,6 +1221,7 @@ function DetailItem({
 }) {
   return (
     <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
+
       <p className="text-xs uppercase tracking-wide text-slate-500">
         {label}
       </p>
@@ -785,6 +1229,7 @@ function DetailItem({
       <p className="mt-2 text-sm font-medium text-white">
         {value}
       </p>
+
     </div>
   );
 }
