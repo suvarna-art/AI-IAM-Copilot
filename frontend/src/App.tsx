@@ -17,6 +17,7 @@ import Settings from "./pages/Settings";
 import Roles from "./pages/Roles";
 import PrivilegedAccess from "./pages/PrivilegedAccess";
 import AICopilot from "./components/AICopilot";
+import PermissionDrift from "./pages/PermissionDrift";
 
 export default function App() {
   return (
@@ -57,6 +58,12 @@ export default function App() {
           <Route
             path="/risk-intelligence"
             element={<RiskIntelligence />}
+          />
+
+          {/* Permission Drift */}
+          <Route
+            path="/permission-drift"
+            element={<PermissionDrift />}
           />
 
           {/* Activity */}

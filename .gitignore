@@ -59,3 +59,9 @@ build/
 Thumbs.db
 
 backend/*.env.txt
+
+# Permission Drift runtime-generated data
+backend/app/data/permission_drift/policy_exemptions.db
+backend/app/data/permission_drift/final_drift_findings.json
+backend/app/data/permission_drift/synthetic_audit_logs.json
+backend/app/data/permission_drift/raw_drift_findings.json

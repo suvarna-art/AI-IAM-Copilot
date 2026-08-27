@@ -51,6 +51,11 @@ const pageConfig: Record<
     subtitle: "Enterprise identity risk intelligence and analysis",
   },
 
+  "/permission-drift": {
+    title: "Permission Drift",
+    subtitle: "14-day entitlement usage analysis and governance intelligence",
+  },
+
   "/activity": {
     title: "Activity",
     subtitle: "Enterprise identity and security activity",

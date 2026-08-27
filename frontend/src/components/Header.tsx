@@ -81,6 +81,11 @@ const searchableModules = [
     route: "/risk-intelligence",
   },
   {
+    label: "Permission Drift",
+    description: "14-day entitlement usage and drift analysis",
+    route: "/permission-drift",
+  },
+  {
     label: "Activity",
     description: "IAM security activity",
     route: "/activity",

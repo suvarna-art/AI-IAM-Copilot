@@ -17,6 +17,9 @@ from app.api import access_control
 from app.routers import settings
 from app.routers import roles
 from app.routers import privileged_access
+from app.routers.permission_drift.permission_drift import (
+    router as permission_drift_router,
+)
 
 
 load_dotenv()
@@ -71,6 +74,7 @@ app.include_router(analytics.router)
 app.include_router(settings.router)
 app.include_router(roles.router)
 app.include_router(privileged_access.router)
+app.include_router(permission_drift_router)
 
 
 # =========================================================

@@ -7,6 +7,7 @@ import {
   KeyRound,
   Bot,
   BrainCircuit,
+  GitCompareArrows,
   Activity,
   BarChart3,
   Settings,
@@ -55,6 +56,11 @@ const navigation = [
     name: "Risk Intelligence",
     path: "/risk-intelligence",
     icon: BrainCircuit,
+  },
+  {
+    name: "Permission Drift",
+    path: "/permission-drift",
+    icon: GitCompareArrows,
   },
   {
     name: "Activity",
