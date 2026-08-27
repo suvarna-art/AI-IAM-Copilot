@@ -1,7 +1,14 @@
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel, Field
+from fastapi import (
+    APIRouter,
+    HTTPException,
+)
+
+from pydantic import (
+    BaseModel,
+    Field,
+)
 
 from app.services.permission_drift.drift_engine import (
     analyze_permission_drift,
@@ -9,8 +16,12 @@ from app.services.permission_drift.drift_engine import (
 
 from app.services.permission_drift.exemptions_engine import (
     apply_exemptions,
+    find_exact_rule,
     get_connection,
+    get_exemption_by_id,
     initialize_database,
+    insert_exemption_record,
+    list_exemptions,
     seed_demo_exemptions,
 )
 
@@ -56,17 +67,6 @@ class CreateExemptionRequest(BaseModel):
 # =========================================================
 
 def get_current_findings() -> list[dict]:
-    """
-    Run the current permission drift pipeline.
-
-    Current assignments
-        -> DuckDB activity analysis
-        -> SQLite exemption evaluation
-        -> final governance findings
-
-    Phase 1 does not modify user access.
-    """
-
     try:
         initialize_database()
         seed_demo_exemptions()
@@ -75,13 +75,12 @@ def get_current_findings() -> list[dict]:
             analyze_permission_drift()
         )
 
-        final_findings = (
-            apply_exemptions(
-                raw_findings
-            )
+        return apply_exemptions(
+            raw_findings
         )
 
-        return final_findings
+    except HTTPException:
+        raise
 
     except Exception as exc:
         raise HTTPException(
@@ -109,16 +108,18 @@ def get_permission_drift_summary():
         "EXEMPTION_EXPIRED": 0,
     }
 
+    identities = set()
+
     high_risk = 0
     dormant = 0
     privileged = 0
     service_accounts = 0
 
-    identities = set()
-
     for finding in findings:
         identities.add(
-            finding["user_id"]
+            finding[
+                "user_id"
+            ]
         )
 
         final_status = finding.get(
@@ -169,10 +170,14 @@ def get_permission_drift_summary():
             len(findings),
 
         "active":
-            status_counts["ACTIVE"],
+            status_counts[
+                "ACTIVE"
+            ],
 
         "monitored":
-            status_counts["MONITORED"],
+            status_counts[
+                "MONITORED"
+            ],
 
         "drift_candidates":
             status_counts[
@@ -180,7 +185,9 @@ def get_permission_drift_summary():
             ],
 
         "exempt":
-            status_counts["EXEMPT"],
+            status_counts[
+                "EXEMPT"
+            ],
 
         "exemption_expired":
             status_counts[
@@ -202,17 +209,13 @@ def get_permission_drift_summary():
 
 
 # =========================================================
-# ALL FINDINGS
+# FINDINGS
 # =========================================================
 
 @router.get("/findings")
 def get_permission_drift_findings():
     return get_current_findings()
 
-
-# =========================================================
-# HIGH-RISK FINDINGS
-# =========================================================
 
 @router.get("/high-risk")
 def get_high_risk_permission_drift():
@@ -234,10 +237,6 @@ def get_high_risk_permission_drift():
     ]
 
 
-# =========================================================
-# DRIFT CANDIDATES
-# =========================================================
-
 @router.get("/drift-candidates")
 def get_drift_candidates():
     findings = get_current_findings()
@@ -258,41 +257,17 @@ def get_drift_candidates():
 
 @router.get("/exemptions")
 def get_policy_exemptions():
-    initialize_database()
-    seed_demo_exemptions()
-
-    connection = get_connection()
-
     try:
-        rows = connection.execute(
-            """
-            SELECT
-                exemption_id,
-                user_id,
-                account_type,
-                permission,
-                exemption_type,
-                reason,
-                expected_frequency,
-                valid_from,
-                valid_until,
-                created_by,
-                status,
-                created_at
+        return list_exemptions()
 
-            FROM policy_exemptions
-
-            ORDER BY exemption_id
-            """
-        ).fetchall()
-
-        return [
-            dict(row)
-            for row in rows
-        ]
-
-    finally:
-        connection.close()
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500,
+            detail=(
+                "Unable to load policy "
+                f"exemptions: {str(exc)}"
+            ),
+        ) from exc
 
 
 # =========================================================
@@ -304,37 +279,39 @@ def create_policy_exemption(
     request: CreateExemptionRequest,
 ):
     initialize_database()
+    seed_demo_exemptions()
 
     now = datetime.now(
         timezone.utc
     )
 
-    valid_from = (
-        request.valid_from
-    )
+    valid_from = request.valid_from
 
     valid_until = (
         request.valid_until
     )
 
-    # Normalize naive datetimes to UTC.
     if valid_from.tzinfo is None:
-        valid_from = valid_from.replace(
-            tzinfo=timezone.utc
+        valid_from = (
+            valid_from.replace(
+                tzinfo=timezone.utc
+            )
         )
 
     if (
         valid_until is not None
         and valid_until.tzinfo is None
     ):
-        valid_until = valid_until.replace(
-            tzinfo=timezone.utc
+        valid_until = (
+            valid_until.replace(
+                tzinfo=timezone.utc
+            )
         )
 
-    # Expiration must be later than activation.
     if (
         valid_until is not None
-        and valid_until <= valid_from
+        and valid_until
+        <= valid_from
     ):
         raise HTTPException(
             status_code=400,
@@ -344,7 +321,6 @@ def create_policy_exemption(
             ),
         )
 
-    # Prevent a completely global exemption.
     if (
         request.user_id is None
         and request.account_type is None
@@ -353,63 +329,28 @@ def create_policy_exemption(
         raise HTTPException(
             status_code=400,
             detail=(
-                "At least one exemption scope "
-                "must be provided."
+                "At least one exemption "
+                "scope must be provided."
             ),
         )
 
     connection = get_connection()
 
     try:
-        # -----------------------------------------------------
-        # DUPLICATE ACTIVE RULE PROTECTION
-        # -----------------------------------------------------
+        duplicate = find_exact_rule(
+            connection=connection,
 
-        duplicate = connection.execute(
-            """
-            SELECT exemption_id
-
-            FROM policy_exemptions
-
-            WHERE status = 'ACTIVE'
-
-              AND (
-                  user_id = ?
-                  OR (
-                      user_id IS NULL
-                      AND ? IS NULL
-                  )
-              )
-
-              AND (
-                  account_type = ?
-                  OR (
-                      account_type IS NULL
-                      AND ? IS NULL
-                  )
-              )
-
-              AND (
-                  permission = ?
-                  OR (
-                      permission IS NULL
-                      AND ? IS NULL
-                  )
-              )
-
-            LIMIT 1
-            """,
-            (
-                request.user_id,
+            user_id=
                 request.user_id,
 
-                request.account_type,
+            account_type=
                 request.account_type,
 
+            permission=
                 request.permission,
-                request.permission,
-            ),
-        ).fetchone()
+
+            status="ACTIVE",
+        )
 
         if duplicate:
             raise HTTPException(
@@ -420,93 +361,88 @@ def create_policy_exemption(
                 ),
             )
 
-        # -----------------------------------------------------
-        # CREATE EXEMPTION
-        # -----------------------------------------------------
+        exemption_id = (
+            insert_exemption_record(
+                connection=connection,
 
-        cursor = connection.execute(
-            """
-            INSERT INTO policy_exemptions (
-                user_id,
-                account_type,
-                permission,
-                exemption_type,
-                reason,
-                expected_frequency,
-                valid_from,
-                valid_until,
-                created_by,
-                status,
-                created_at
-            )
-            VALUES (
-                ?, ?, ?, ?, ?, ?,
-                ?, ?, ?, ?, ?
-            )
-            """,
-            (
-                request.user_id,
-                request.account_type,
-                request.permission,
-                request.exemption_type,
-                request.reason,
-                request.expected_frequency,
+                user_id=
+                    request.user_id,
 
-                valid_from.isoformat(),
+                account_type=
+                    request.account_type,
 
-                (
+                permission=
+                    request.permission,
+
+                exemption_type=
+                    request.exemption_type,
+
+                reason=
+                    request.reason,
+
+                expected_frequency=
+                    request.expected_frequency,
+
+                valid_from=
+                    valid_from.isoformat(),
+
+                valid_until=(
                     valid_until.isoformat()
                     if valid_until
                     else None
                 ),
 
-                request.created_by,
-                "ACTIVE",
-                now.isoformat(),
-            ),
+                created_by=
+                    request.created_by,
+
+                status="ACTIVE",
+
+                created_at=
+                    now.isoformat(),
+            )
         )
 
         connection.commit()
 
-        exemption_id = (
-            cursor.lastrowid
+        exemption = (
+            get_exemption_by_id(
+                connection,
+                exemption_id,
+            )
         )
 
-        # -----------------------------------------------------
-        # RETURN CREATED RULE
-        # -----------------------------------------------------
+        if exemption is None:
+            raise HTTPException(
+                status_code=500,
+                detail=(
+                    "Exemption was created "
+                    "but could not be retrieved."
+                ),
+            )
 
-        row = connection.execute(
-            """
-            SELECT
-                exemption_id,
-                user_id,
-                account_type,
-                permission,
-                exemption_type,
-                reason,
-                expected_frequency,
-                valid_from,
-                valid_until,
-                created_by,
-                status,
-                created_at
+        for field in (
+            "valid_from",
+            "valid_until",
+            "created_at",
+        ):
+            value = exemption.get(
+                field
+            )
 
-            FROM policy_exemptions
-
-            WHERE exemption_id = ?
-            """,
-            (
-                exemption_id,
-            ),
-        ).fetchone()
+            if isinstance(
+                value,
+                datetime,
+            ):
+                exemption[field] = (
+                    value.isoformat()
+                )
 
         return {
             "message":
                 "Policy exemption created successfully.",
 
             "exemption":
-                dict(row),
+                exemption,
         }
 
     finally:
