@@ -1,6 +1,11 @@
 import json
 from pathlib import Path
 from typing import Any
+from app.scripts.generate_audit_logs import (
+    load_assigned_permissions,
+    generate_activity_events,
+    save_events,
+)
 
 
 BASE_DIR = Path(__file__).resolve().parents[2]
@@ -63,8 +68,11 @@ def load_audit_events() -> list[dict[str, Any]]:
     """
     Returns raw permission-usage audit events.
 
-    Current implementation:
+    Current demo implementation:
         Local synthetic JSON logs.
+
+    If the runtime log file does not yet exist,
+    generate the demo audit dataset automatically.
 
     Future implementations can replace this with:
         - SIEM event stream
@@ -75,10 +83,22 @@ def load_audit_events() -> list[dict[str, Any]]:
         - cloud storage exports
     """
 
+    if not AUDIT_LOG_FILE.exists():
+        assigned_permissions = (
+            load_assigned_permissions()
+        )
+
+        events = (
+            generate_activity_events(
+                assigned_permissions
+            )
+        )
+
+        save_events(events)
+
     return _load_json_file(
         AUDIT_LOG_FILE
     )
-
 
 def load_identity_metadata() -> list[dict[str, Any]]:
     """
