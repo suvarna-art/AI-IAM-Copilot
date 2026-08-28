@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from fastapi import Depends 
 
 from fastapi import (
     APIRouter,
@@ -25,6 +26,7 @@ from app.services.permission_drift.exemptions_engine import (
     seed_demo_exemptions,
 )
 
+from app.security.dependencies import require_admin
 
 router = APIRouter(
     prefix="/permission-drift",
@@ -277,6 +279,7 @@ def get_policy_exemptions():
 @router.post("/exemptions")
 def create_policy_exemption(
     request: CreateExemptionRequest,
+    current_user: dict = Depends(require_admin),
 ):
     initialize_database()
     seed_demo_exemptions()

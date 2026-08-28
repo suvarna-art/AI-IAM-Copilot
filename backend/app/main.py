@@ -17,6 +17,7 @@ from app.api import access_control
 from app.routers import settings
 from app.routers import roles
 from app.routers import privileged_access
+from app.routers.auth import router as auth_router
 from app.routers.permission_drift.permission_drift import (
     router as permission_drift_router,
 )
@@ -37,10 +38,42 @@ cors_origins = [
 ]
 
 
+import os
+
+from fastapi import FastAPI
+
+
+ENVIRONMENT = os.getenv(
+    "ENVIRONMENT",
+    "development",
+).lower()
+
+IS_PRODUCTION = (
+    ENVIRONMENT == "production"
+)
+
+
 app = FastAPI(
-    title="IdentityForge AI - AI-IAM Copilot",
-    description="Enterprise Identity Security Platform",
+    title="IdentityForge AI",
     version="1.0.0",
+
+    docs_url=(
+        None
+        if IS_PRODUCTION
+        else "/docs"
+    ),
+
+    redoc_url=(
+        None
+        if IS_PRODUCTION
+        else "/redoc"
+    ),
+
+    openapi_url=(
+        None
+        if IS_PRODUCTION
+        else "/openapi.json"
+    ),
 )
 
 
@@ -75,6 +108,7 @@ app.include_router(settings.router)
 app.include_router(roles.router)
 app.include_router(privileged_access.router)
 app.include_router(permission_drift_router)
+app.include_router(auth_router)
 
 
 # =========================================================
