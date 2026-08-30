@@ -133,4 +133,6 @@ def health():
     return {
         "status": "Healthy",
         "application": "AI-IAM Copilot",
+        "environment": ENVIRONMENT,
+        "is_production": IS_PRODUCTION,
     }
