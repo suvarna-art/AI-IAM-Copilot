@@ -1,0 +1,34 @@
+[
+  {
+    "username": "iamadmin",
+    "display_name": "Identity Security Administrator",
+    "department": "Security",
+    "role": "IAM_ADMIN",
+    "account_status": "ACTIVE",
+    "privileged": true
+  },
+  {
+    "username": "securityadmin",
+    "display_name": "Security Administrator",
+    "department": "Security",
+    "role": "SECURITY_ADMIN",
+    "account_status": "ACTIVE",
+    "privileged": true
+  },
+  {
+    "username": "auditor",
+    "display_name": "IAM Auditor",
+    "department": "Audit",
+    "role": "AUDITOR",
+    "account_status": "ACTIVE",
+    "privileged": false
+  },
+  {
+    "username": "finance.user",
+    "display_name": "Finance Analyst",
+    "department": "Finance",
+    "role": "FINANCE_ANALYST",
+    "account_status": "ACTIVE",
+    "privileged": false
+  }
+]

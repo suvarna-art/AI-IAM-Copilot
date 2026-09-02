@@ -23,6 +23,7 @@ import {
 
 import { useNavigate } from "react-router-dom";
 
+import { useAuth } from "../auth/AuthContext";
 import { getAccessReview } from "../services/accessReview";
 
 import {
@@ -113,6 +114,12 @@ export default function Header({
   onMenuClick,
 }: HeaderProps) {
   const navigate = useNavigate();
+
+  const {
+    session,
+    logout,
+    isDemo,
+  } = useAuth();
 
   const [profileOpen, setProfileOpen] =
     useState(false);
@@ -322,6 +329,14 @@ export default function Header({
     navigate(route);
   }
 
+  function handleSignOut() {
+    setProfileOpen(false);
+    setNotificationsOpen(false);
+    setSearchOpen(false);
+    logout();
+    navigate("/login", { replace: true });
+  }
+
   return (
     <header className="sticky top-0 z-30 flex min-h-[64px] shrink-0 items-center justify-between border-b border-slate-800/80 bg-[#0b1224]/95 px-3 py-2 backdrop-blur sm:px-4 lg:h-[72px] lg:px-6">
 
@@ -358,6 +373,13 @@ export default function Header({
           <span className="h-2 w-2 rounded-full bg-emerald-400" />
           System Healthy
         </div>
+
+        {isDemo && (
+          <div className="hidden items-center gap-2 rounded-xl border border-amber-500/20 bg-amber-500/10 px-3 py-2 text-xs font-semibold text-amber-300 md:flex">
+            <ShieldCheck size={15} />
+            Demo · Read Only
+          </div>
+        )}
 
         {/* SEARCH */}
         <div
@@ -629,17 +651,26 @@ export default function Header({
               <div className="border-b border-slate-800 p-5">
                 <div className="flex items-center gap-3">
 
-                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-cyan-500/10 text-cyan-400">
+                  <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${
+                    isDemo
+                      ? "bg-amber-500/10 text-amber-300"
+                      : "bg-cyan-500/10 text-cyan-400"
+                  }`}>
                     <ShieldCheck size={24} />
                   </div>
 
                   <div className="min-w-0">
-                    <p className="font-semibold text-white">
-                      IAM Administrator
+                    <p className="truncate font-semibold text-white">
+                      {session.displayName ||
+                        (isDemo
+                          ? "Demo Viewer"
+                          : "IAM Administrator")}
                     </p>
 
                     <p className="truncate text-xs text-slate-400">
-                      IdentityForge Admin Console
+                      {isDemo
+                        ? "IdentityForge Read-Only Demo"
+                        : "IdentityForge Admin Console"}
                     </p>
                   </div>
 
@@ -653,16 +684,38 @@ export default function Header({
                 </p>
 
                 <p className="mt-1 text-sm font-medium text-slate-200">
-                  Identity Security Administrator
+                  {(session.role ||
+                    (isDemo
+                      ? "DEMO_VIEWER"
+                      : "IAM_ADMIN"))
+                    .replaceAll("_", " ")}
                 </p>
 
                 <div className="mt-3 flex items-center gap-2">
-                  <span className="h-2 w-2 rounded-full bg-emerald-400" />
+                  <span
+                    className={`h-2 w-2 rounded-full ${
+                      isDemo
+                        ? "bg-amber-400"
+                        : "bg-emerald-400"
+                    }`}
+                  />
 
-                  <span className="text-xs text-emerald-400">
-                    Active Admin Session
+                  <span
+                    className={`text-xs ${
+                      isDemo
+                        ? "text-amber-300"
+                        : "text-emerald-400"
+                    }`}
+                  >
+                    {isDemo
+                      ? "Read-Only Demo Session"
+                      : "Active Admin Session"}
                   </span>
                 </div>
+
+                <p className="mt-2 text-[11px] text-slate-500">
+                  Access scope: {session.accessScope || "READ_ONLY"}
+                </p>
 
               </div>
 
@@ -672,26 +725,44 @@ export default function Header({
                   type="button"
                   onClick={() => {
                     setProfileOpen(false);
-                    navigate("/settings");
+
+                    if (!isDemo) {
+                      navigate("/settings");
+                    }
                   }}
-                  className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm text-slate-300 transition hover:bg-slate-800 hover:text-white"
+                  disabled={isDemo}
+                  title={
+                    isDemo
+                      ? "Settings changes require administrator authentication"
+                      : "Open account and platform settings"
+                  }
+                  className={`flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm transition ${
+                    isDemo
+                      ? "cursor-not-allowed text-slate-600"
+                      : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                  }`}
                 >
                   <Settings size={18} />
                   Account & Settings
+
+                  {isDemo && (
+                    <span className="ml-auto text-[10px] uppercase tracking-wide text-amber-400/70">
+                      Admin only
+                    </span>
+                  )}
                 </button>
 
                 <button
                   type="button"
-                  disabled
-                  title="Authentication will be added in a future release"
-                  className="flex w-full cursor-not-allowed items-center gap-3 rounded-xl px-3 py-3 text-left text-sm text-slate-500"
+                  onClick={handleSignOut}
+                  className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm text-slate-300 transition hover:bg-red-500/10 hover:text-red-300"
                 >
                   <LogOut size={18} />
 
                   Sign Out
 
-                  <span className="ml-auto text-[10px] uppercase tracking-wide text-slate-600">
-                    Demo
+                  <span className="ml-auto text-[10px] uppercase tracking-wide text-slate-500">
+                    {isDemo ? "Demo" : "Secure"}
                   </span>
                 </button>
 
