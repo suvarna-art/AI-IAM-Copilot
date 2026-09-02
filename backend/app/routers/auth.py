@@ -1,8 +1,8 @@
 import os
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordRequestForm
-
+from app.security.rate_limit import limiter
 from app.security.auth import (
     create_access_token,
     verify_password,
@@ -29,7 +29,9 @@ def get_admin_credentials() -> tuple[str, str]:
 
 
 @router.post("/login")
+@limiter.limit("5/minute")
 def login(
+    request: Request,
     form_data: OAuth2PasswordRequestForm = Depends(),
 ):
     try:

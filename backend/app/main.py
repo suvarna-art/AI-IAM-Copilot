@@ -18,6 +18,10 @@ from app.routers import settings
 from app.routers import roles
 from app.routers import privileged_access
 from app.routers.auth import router as auth_router
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+
+from app.security.rate_limit import limiter
 from app.routers.permission_drift.permission_drift import (
     router as permission_drift_router,
 )
@@ -75,7 +79,12 @@ app = FastAPI(
         else "/openapi.json"
     ),
 )
+app.state.limiter = limiter
 
+app.add_exception_handler(
+    RateLimitExceeded,
+    _rate_limit_exceeded_handler,
+)
 
 # =========================================================
 # CORS

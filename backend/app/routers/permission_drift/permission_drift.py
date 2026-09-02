@@ -4,6 +4,7 @@ from fastapi import Depends
 from fastapi import (
     APIRouter,
     HTTPException,
+    Request, 
 )
 
 from pydantic import (
@@ -14,7 +15,7 @@ from pydantic import (
 from app.services.permission_drift.drift_engine import (
     analyze_permission_drift,
 )
-
+from app.security.rate_limit import limiter
 from app.services.permission_drift.exemptions_engine import (
     apply_exemptions,
     find_exact_rule,
@@ -99,7 +100,10 @@ def get_current_findings() -> list[dict]:
 # =========================================================
 
 @router.get("/summary")
-def get_permission_drift_summary():
+@limiter.limit("60/minute")
+def get_permission_drift_summary(
+    request: Request,
+):
     findings = get_current_findings()
 
     status_counts = {
@@ -215,7 +219,10 @@ def get_permission_drift_summary():
 # =========================================================
 
 @router.get("/findings")
-def get_permission_drift_findings():
+@limiter.limit("60/minute")
+def get_permission_drift_findings(
+    request: Request,
+):
     return get_current_findings()
 
 
@@ -277,7 +284,9 @@ def get_policy_exemptions():
 # =========================================================
 
 @router.post("/exemptions")
+@limiter.limit("30/minute")
 def create_policy_exemption(
+    http_request: Request,
     request: CreateExemptionRequest,
     current_user: dict = Depends(require_admin),
 ):
