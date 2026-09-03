@@ -1,17 +1,864 @@
 @import "tailwindcss";
 
+
+/* ================================================================
+   IDENTITYFORGE AI
+   ENTERPRISE DESIGN FOUNDATION
+
+   Visual concept:
+   "Identity Fabric"
+
+   Identity → Context → Policy → Risk → Decision
+
+   The interface intentionally avoids:
+   - generic cyberpunk neon
+   - Matrix-style grids
+   - excessive glassmorphism
+   - decorative security clichés
+================================================================ */
+
+
+/* ================================================================
+   DESIGN TOKENS
+================================================================ */
+
+:root {
+  /* --------------------------------------------------------------
+     FOUNDATION
+  -------------------------------------------------------------- */
+
+  --if-ink-0: #05070b;
+  --if-ink-1: #080c13;
+  --if-ink-2: #0c111a;
+  --if-ink-3: #111823;
+  --if-ink-4: #18212e;
+
+  --if-surface-1: rgba(13, 19, 29, 0.86);
+  --if-surface-2: rgba(17, 24, 35, 0.82);
+  --if-surface-3: rgba(23, 32, 45, 0.76);
+
+  --if-surface-hover: rgba(29, 40, 55, 0.88);
+
+
+  /* --------------------------------------------------------------
+     TEXT
+  -------------------------------------------------------------- */
+
+  --if-text-primary: #f3f6fb;
+  --if-text-secondary: #a9b4c3;
+  --if-text-muted: #69778a;
+  --if-text-faint: #485568;
+
+
+  /* --------------------------------------------------------------
+     BRAND INTELLIGENCE
+  -------------------------------------------------------------- */
+
+  --if-teal: #48d7c6;
+  --if-teal-soft: #73e2d6;
+  --if-teal-dim: rgba(72, 215, 198, 0.12);
+
+  --if-violet: #8f83ff;
+  --if-violet-soft: #aaa2ff;
+  --if-violet-dim: rgba(143, 131, 255, 0.12);
+
+
+  /* --------------------------------------------------------------
+     DECISION STATES
+  -------------------------------------------------------------- */
+
+  --if-allow: #55d6a2;
+  --if-allow-dim: rgba(85, 214, 162, 0.1);
+
+  --if-step-up: #e6b35c;
+  --if-step-up-dim: rgba(230, 179, 92, 0.1);
+
+  --if-deny: #ef7282;
+  --if-deny-dim: rgba(239, 114, 130, 0.1);
+
+  --if-demo: #9b8cff;
+  --if-demo-dim: rgba(155, 140, 255, 0.1);
+
+
+  /* --------------------------------------------------------------
+     STRUCTURE
+  -------------------------------------------------------------- */
+
+  --if-border-soft: rgba(148, 163, 184, 0.08);
+  --if-border: rgba(148, 163, 184, 0.13);
+  --if-border-strong: rgba(148, 163, 184, 0.2);
+
+  --if-brand-border: rgba(72, 215, 198, 0.2);
+
+  --if-radius-sm: 10px;
+  --if-radius-md: 14px;
+  --if-radius-lg: 18px;
+  --if-radius-xl: 24px;
+
+
+  /* --------------------------------------------------------------
+     SHADOW SYSTEM
+  -------------------------------------------------------------- */
+
+  --if-shadow-sm:
+    0 4px 16px rgba(0, 0, 0, 0.18);
+
+  --if-shadow-md:
+    0 12px 36px rgba(0, 0, 0, 0.24);
+
+  --if-shadow-lg:
+    0 28px 70px rgba(0, 0, 0, 0.34);
+
+
+  /* --------------------------------------------------------------
+     MOTION
+  -------------------------------------------------------------- */
+
+  --if-motion-fast: 140ms;
+  --if-motion-normal: 220ms;
+  --if-motion-slow: 420ms;
+}
+
+
+/* ================================================================
+   ROOT
+================================================================ */
+
 html,
 body,
 #root {
   width: 100%;
-  height: 100%;
+  min-height: 100%;
   margin: 0;
 }
 
+
+html {
+  background:
+    var(--if-ink-0);
+
+  color-scheme: dark;
+
+  text-rendering:
+    optimizeLegibility;
+
+  -webkit-font-smoothing:
+    antialiased;
+
+  -moz-osx-font-smoothing:
+    grayscale;
+}
+
+
 body {
+  min-width: 320px;
+
+  margin: 0;
+
   font-family:
     Inter,
+    ui-sans-serif,
     system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
     sans-serif;
-    background: #0f172a;
+
+  color:
+    var(--if-text-primary);
+
+  background:
+    var(--if-ink-0);
+
+  overflow-x:
+    hidden;
+}
+
+
+button,
+input,
+textarea,
+select {
+  font:
+    inherit;
+}
+
+
+button {
+  -webkit-tap-highlight-color:
+    transparent;
+}
+
+
+button,
+a {
+  outline-color:
+    var(--if-teal);
+}
+
+
+::selection {
+  color:
+    #07100f;
+
+  background:
+    var(--if-teal-soft);
+}
+
+
+/* ================================================================
+   IDENTITY FABRIC — APPLICATION BACKGROUND
+
+   This is intentionally subtle.
+
+   The radial structures represent distributed identities and
+   contextual trust points rather than decorative neon blobs.
+================================================================ */
+
+.identityforge-background {
+  position:
+    relative;
+
+  min-height:
+    100vh;
+
+  isolation:
+    isolate;
+
+  background:
+    linear-gradient(
+      145deg,
+      #05070b 0%,
+      #080c13 38%,
+      #0a0f17 68%,
+      #070a10 100%
+    );
+
+  overflow:
+    hidden;
+}
+
+
+.identityforge-background::before {
+  content:
+    "";
+
+  position:
+    fixed;
+
+  inset:
+    0;
+
+  pointer-events:
+    none;
+
+  z-index:
+    -2;
+
+  background:
+
+    radial-gradient(
+      circle at 12% 14%,
+      rgba(72, 215, 198, 0.065) 0,
+      rgba(72, 215, 198, 0.025) 12%,
+      transparent 31%
+    ),
+
+    radial-gradient(
+      circle at 84% 22%,
+      rgba(143, 131, 255, 0.065) 0,
+      rgba(143, 131, 255, 0.025) 14%,
+      transparent 34%
+    ),
+
+    radial-gradient(
+      circle at 58% 88%,
+      rgba(72, 215, 198, 0.035) 0,
+      transparent 29%
+    );
+}
+
+
+/* --------------------------------------------------------------
+   IDENTITY FABRIC NETWORK
+
+   Fine intersecting paths create a quiet network / relationship
+   structure. Low opacity keeps it enterprise-grade.
+-------------------------------------------------------------- */
+
+.identityforge-background::after {
+  content:
+    "";
+
+  position:
+    fixed;
+
+  inset:
+    0;
+
+  pointer-events:
+    none;
+
+  z-index:
+    -1;
+
+  opacity:
+    0.38;
+
+  background-image:
+
+    linear-gradient(
+      rgba(127, 146, 168, 0.025) 1px,
+      transparent 1px
+    ),
+
+    linear-gradient(
+      90deg,
+      rgba(127, 146, 168, 0.025) 1px,
+      transparent 1px
+    );
+
+  background-size:
+    72px 72px;
+
+  mask-image:
+    radial-gradient(
+      ellipse at center,
+      black 18%,
+      rgba(0, 0, 0, 0.7) 52%,
+      transparent 95%
+    );
+}
+
+
+/* ================================================================
+   IDENTITY NODE MOTIF
+
+   Use sparingly on important areas:
+   - Login
+   - Dashboard hero
+   - Risk intelligence
+   - Decision screens
+================================================================ */
+
+.identity-fabric {
+  position:
+    relative;
+
+  overflow:
+    hidden;
+}
+
+
+.identity-fabric::before {
+  content:
+    "";
+
+  position:
+    absolute;
+
+  inset:
+    0;
+
+  pointer-events:
+    none;
+
+  opacity:
+    0.42;
+
+  background-image:
+
+    radial-gradient(
+      circle at 17% 31%,
+      rgba(72, 215, 198, 0.4) 0 1px,
+      transparent 2px
+    ),
+
+    radial-gradient(
+      circle at 38% 64%,
+      rgba(143, 131, 255, 0.35) 0 1px,
+      transparent 2px
+    ),
+
+    radial-gradient(
+      circle at 72% 25%,
+      rgba(72, 215, 198, 0.3) 0 1px,
+      transparent 2px
+    ),
+
+    radial-gradient(
+      circle at 83% 72%,
+      rgba(143, 131, 255, 0.3) 0 1px,
+      transparent 2px
+    );
+}
+
+
+/* ================================================================
+   ENTERPRISE SURFACES
+================================================================ */
+
+.if-surface {
+  border:
+    1px solid var(--if-border-soft);
+
+  border-radius:
+    var(--if-radius-lg);
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(17, 24, 35, 0.9),
+      rgba(10, 15, 23, 0.82)
+    );
+
+  box-shadow:
+    var(--if-shadow-sm);
+
+  backdrop-filter:
+    blur(14px);
+}
+
+
+.if-surface-elevated {
+  border:
+    1px solid var(--if-border);
+
+  border-radius:
+    var(--if-radius-xl);
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(20, 28, 40, 0.95),
+      rgba(10, 15, 23, 0.94)
+    );
+
+  box-shadow:
+    var(--if-shadow-md);
+
+  backdrop-filter:
+    blur(18px);
+}
+
+
+.if-surface-interactive {
+  transition:
+    transform var(--if-motion-normal) ease,
+    border-color var(--if-motion-normal) ease,
+    background var(--if-motion-normal) ease,
+    box-shadow var(--if-motion-normal) ease;
+}
+
+
+.if-surface-interactive:hover {
+  border-color:
+    rgba(72, 215, 198, 0.18);
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(22, 31, 44, 0.96),
+      rgba(12, 18, 27, 0.92)
+    );
+
+  transform:
+    translateY(-1px);
+
+  box-shadow:
+    var(--if-shadow-md);
+}
+
+
+/* ================================================================
+   BRAND ACCENT
+================================================================ */
+
+.if-brand-gradient {
+  background:
+    linear-gradient(
+      110deg,
+      var(--if-teal-soft),
+      var(--if-violet-soft)
+    );
+
+  -webkit-background-clip:
+    text;
+
+  background-clip:
+    text;
+
+  color:
+    transparent;
+}
+
+
+.if-brand-line {
+  height:
+    1px;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(72, 215, 198, 0.5),
+      rgba(143, 131, 255, 0.42),
+      transparent
+    );
+}
+
+
+/* ================================================================
+   DECISION STATE LANGUAGE
+================================================================ */
+
+.if-state-allow {
+  border-color:
+    rgba(85, 214, 162, 0.22);
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(85, 214, 162, 0.08),
+      rgba(12, 18, 27, 0.9)
+    );
+}
+
+
+.if-state-step-up {
+  border-color:
+    rgba(230, 179, 92, 0.24);
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(230, 179, 92, 0.08),
+      rgba(12, 18, 27, 0.9)
+    );
+}
+
+
+.if-state-deny {
+  border-color:
+    rgba(239, 114, 130, 0.24);
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(239, 114, 130, 0.08),
+      rgba(12, 18, 27, 0.9)
+    );
+}
+
+
+.if-state-demo {
+  border-color:
+    rgba(155, 140, 255, 0.22);
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(155, 140, 255, 0.075),
+      rgba(12, 18, 27, 0.9)
+    );
+}
+
+
+/* ================================================================
+   BUTTON FOUNDATION
+================================================================ */
+
+.if-button-primary {
+  display:
+    inline-flex;
+
+  align-items:
+    center;
+
+  justify-content:
+    center;
+
+  gap:
+    0.5rem;
+
+  border:
+    1px solid rgba(72, 215, 198, 0.22);
+
+  border-radius:
+    12px;
+
+  color:
+    #06100f;
+
+  background:
+    linear-gradient(
+      110deg,
+      #68dfd1,
+      #8ce8dd
+    );
+
+  box-shadow:
+    0 8px 24px rgba(72, 215, 198, 0.11);
+
+  transition:
+    transform var(--if-motion-fast) ease,
+    box-shadow var(--if-motion-normal) ease,
+    filter var(--if-motion-fast) ease;
+}
+
+
+.if-button-primary:hover {
+  transform:
+    translateY(-1px);
+
+  filter:
+    brightness(1.04);
+
+  box-shadow:
+    0 12px 32px rgba(72, 215, 198, 0.16);
+}
+
+
+.if-button-primary:active {
+  transform:
+    translateY(0);
+}
+
+
+/* ================================================================
+   INPUT FOUNDATION
+================================================================ */
+
+.if-input {
+  width:
+    100%;
+
+  border:
+    1px solid var(--if-border);
+
+  border-radius:
+    12px;
+
+  color:
+    var(--if-text-primary);
+
+  background:
+    rgba(7, 11, 17, 0.72);
+
+  transition:
+    border-color var(--if-motion-fast) ease,
+    box-shadow var(--if-motion-fast) ease,
+    background var(--if-motion-fast) ease;
+}
+
+
+.if-input:hover {
+  border-color:
+    var(--if-border-strong);
+}
+
+
+.if-input:focus {
+  border-color:
+    rgba(72, 215, 198, 0.48);
+
+  background:
+    rgba(8, 13, 20, 0.92);
+
+  box-shadow:
+    0 0 0 3px rgba(72, 215, 198, 0.07);
+
+  outline:
+    none;
+}
+
+
+/* ================================================================
+   BADGES
+================================================================ */
+
+.if-badge {
+  display:
+    inline-flex;
+
+  align-items:
+    center;
+
+  gap:
+    0.4rem;
+
+  border:
+    1px solid var(--if-border);
+
+  border-radius:
+    999px;
+
+  padding:
+    0.35rem 0.7rem;
+
+  font-size:
+    0.6875rem;
+
+  font-weight:
+    600;
+
+  letter-spacing:
+    0.08em;
+
+  text-transform:
+    uppercase;
+
+  background:
+    rgba(12, 18, 27, 0.7);
+}
+
+
+.if-badge-intelligence {
+  color:
+    var(--if-teal-soft);
+
+  border-color:
+    rgba(72, 215, 198, 0.2);
+
+  background:
+    rgba(72, 215, 198, 0.065);
+}
+
+
+/* ================================================================
+   TYPOGRAPHY
+================================================================ */
+
+.if-eyebrow {
+  color:
+    var(--if-teal-soft);
+
+  font-size:
+    0.6875rem;
+
+  font-weight:
+    700;
+
+  letter-spacing:
+    0.16em;
+
+  text-transform:
+    uppercase;
+}
+
+
+.if-heading {
+  color:
+    var(--if-text-primary);
+
+  letter-spacing:
+    -0.025em;
+}
+
+
+.if-muted {
+  color:
+    var(--if-text-secondary);
+}
+
+
+/* ================================================================
+   SCROLLBAR
+================================================================ */
+
+* {
+  scrollbar-width:
+    thin;
+
+  scrollbar-color:
+    rgba(105, 119, 138, 0.42)
+    transparent;
+}
+
+
+*::-webkit-scrollbar {
+  width:
+    8px;
+
+  height:
+    8px;
+}
+
+
+*::-webkit-scrollbar-track {
+  background:
+    transparent;
+}
+
+
+*::-webkit-scrollbar-thumb {
+  border-radius:
+    999px;
+
+  background:
+    rgba(105, 119, 138, 0.34);
+}
+
+
+*::-webkit-scrollbar-thumb:hover {
+  background:
+    rgba(105, 119, 138, 0.5);
+}
+
+
+/* ================================================================
+   MOTION
+================================================================ */
+
+@keyframes identityforge-enter {
+  from {
+    opacity:
+      0;
+
+    transform:
+      translateY(5px);
+  }
+
+  to {
+    opacity:
+      1;
+
+    transform:
+      translateY(0);
+  }
+}
+
+
+.if-enter {
+  animation:
+    identityforge-enter
+    420ms
+    cubic-bezier(0.2, 0.8, 0.2, 1)
+    both;
+}
+
+
+/* ================================================================
+   ACCESSIBILITY
+================================================================ */
+
+@media (
+  prefers-reduced-motion:
+  reduce
+) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior:
+      auto !important;
+
+    animation-duration:
+      0.01ms !important;
+
+    animation-iteration-count:
+      1 !important;
+
+    transition-duration:
+      0.01ms !important;
+  }
 }

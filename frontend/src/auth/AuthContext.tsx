@@ -9,6 +9,7 @@ import {
 
 import {
   ACCESS_TOKEN_KEY,
+  AuthorizationDecisionError,
   getCurrentUser,
   loginAdmin,
 } from "../services/auth";
@@ -39,6 +40,8 @@ interface AuthContextValue {
   enterDemoMode: () => void;
 
   logout: () => void;
+
+  clearPendingDecision: () => void;
 
   isAuthenticated: boolean;
 
@@ -103,8 +106,7 @@ export function AuthProvider({
     restoringSession,
     setRestoringSession,
   ] =
-    useState(true
-    );
+    useState(true);
 
 
   const logout = useCallback(() => {
@@ -188,32 +190,91 @@ export function AuthProvider({
     username: string,
     password: string
   ) {
-    const response =
-      await loginAdmin(
-        username,
-        password
+    setPendingDecision(
+      null
+    );
+
+
+    try {
+      const response =
+        await loginAdmin(
+          username,
+          password
+        );
+
+
+      setAccessToken(
+        response.access_token
       );
 
 
-    setAccessToken(
-      response.access_token
-    );
+      setPendingDecision(
+        response.authorization
+      );
 
 
-    setPendingDecision(
-      response.authorization
-    );
+      sessionStorage.setItem(
+        ACCESS_TOKEN_KEY,
+        response.access_token
+      );
+
+    } catch (error) {
+
+      /*
+       * Authentication may succeed while
+       * authorization returns STEP_UP or DENY.
+       *
+       * No JWT is stored for those outcomes.
+       */
+
+      if (
+        error instanceof
+        AuthorizationDecisionError
+      ) {
+        sessionStorage.removeItem(
+          ACCESS_TOKEN_KEY
+        );
+
+        sessionStorage.removeItem(
+          "identityforge_auth_session"
+        );
+
+        setAccessToken(
+          null
+        );
+
+        setSession(
+          signedOutSession
+        );
+
+        setPendingDecision(
+          error.decision
+        );
+
+        return;
+      }
 
 
-    sessionStorage.setItem(
-      ACCESS_TOKEN_KEY,
-      response.access_token
-    );
+      throw error;
+    }
   }
 
 
   function enterAdminSession() {
     if (!pendingDecision) {
+      return;
+    }
+
+
+    /*
+     * Only successful ALLOW decisions may
+     * create an administrator session.
+     */
+
+    if (
+      pendingDecision.decision !==
+      "ALLOW"
+    ) {
       return;
     }
 
@@ -285,7 +346,10 @@ export function AuthProvider({
     );
 
 
-    setAccessToken(null);
+    setAccessToken(
+      null
+    );
+
 
     setPendingDecision(
       null
@@ -302,6 +366,13 @@ export function AuthProvider({
       JSON.stringify(
         demoSession
       )
+    );
+  }
+
+
+  function clearPendingDecision() {
+    setPendingDecision(
+      null
     );
   }
 
@@ -324,6 +395,8 @@ export function AuthProvider({
         enterDemoMode,
 
         logout,
+
+        clearPendingDecision,
 
         isAuthenticated:
           session.mode !==

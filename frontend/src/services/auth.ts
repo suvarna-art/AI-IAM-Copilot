@@ -1,5 +1,6 @@
 import type {
   AuthenticatedUser,
+  AuthorizationDecision,
   LoginResponse,
 } from "../types/auth";
 
@@ -13,11 +14,30 @@ export const ACCESS_TOKEN_KEY =
   "identityforge_access_token";
 
 
+export class AuthorizationDecisionError extends Error {
+  decision: AuthorizationDecision;
+
+  constructor(
+    message: string,
+    decision: AuthorizationDecision
+  ) {
+    super(message);
+
+    this.name =
+      "AuthorizationDecisionError";
+
+    this.decision =
+      decision;
+  }
+}
+
+
 export async function loginAdmin(
   username: string,
   password: string
 ): Promise<LoginResponse> {
-  const body = new URLSearchParams();
+  const body =
+    new URLSearchParams();
 
   body.set(
     "username",
@@ -34,28 +54,36 @@ export async function loginAdmin(
     "password"
   );
 
-  const response = await fetch(
-    `${API_BASE_URL}/auth/login`,
-    {
-      method: "POST",
 
-      headers: {
-        "Content-Type":
-          "application/x-www-form-urlencoded",
-      },
+  const response =
+    await fetch(
+      `${API_BASE_URL}/auth/login`,
+      {
+        method: "POST",
 
-      body,
-    }
-  );
+        headers: {
+          "Content-Type":
+            "application/x-www-form-urlencoded",
+        },
+
+        body,
+      }
+    );
 
 
   if (!response.ok) {
     let message =
       "Authentication failed.";
 
+    let decision:
+      AuthorizationDecision | null =
+      null;
+
+
     try {
       const data =
         await response.json();
+
 
       if (
         typeof data?.detail ===
@@ -63,25 +91,50 @@ export async function loginAdmin(
       ) {
         message =
           data.detail;
-      } else if (
+      }
+
+
+      if (
         typeof data?.detail?.message ===
         "string"
       ) {
         message =
           data.detail.message;
       }
+
+
+      if (
+        data?.detail?.decision
+      ) {
+        decision =
+          data.detail.decision;
+      }
+
     } catch {
-      // Preserve generic message.
+      // Keep safe generic fallback.
     }
+
 
     if (
       response.status === 429
     ) {
-      message =
-        "Too many sign-in attempts. Please wait before trying again.";
+      throw new Error(
+        "Too many sign-in attempts. Please wait before trying again."
+      );
     }
 
-    throw new Error(message);
+
+    if (decision) {
+      throw new AuthorizationDecisionError(
+        message,
+        decision
+      );
+    }
+
+
+    throw new Error(
+      message
+    );
   }
 
 
@@ -92,15 +145,16 @@ export async function loginAdmin(
 export async function getCurrentUser(
   accessToken: string
 ): Promise<AuthenticatedUser> {
-  const response = await fetch(
-    `${API_BASE_URL}/auth/me`,
-    {
-      headers: {
-        Authorization:
-          `Bearer ${accessToken}`,
-      },
-    }
-  );
+  const response =
+    await fetch(
+      `${API_BASE_URL}/auth/me`,
+      {
+        headers: {
+          Authorization:
+            `Bearer ${accessToken}`,
+        },
+      }
+    );
 
 
   if (!response.ok) {

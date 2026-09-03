@@ -1,14 +1,17 @@
 import {
-  ClipboardCheck,
-  CheckCircle2,
-  Clock3,
   AlertTriangle,
   CalendarClock,
+  CheckCircle2,
+  ClipboardCheck,
+  Clock3,
 } from "lucide-react";
 
 import GovernanceActions from "./GovernanceActions";
 
-import type { GovernanceAction } from "../types/accessReview";
+import type {
+  GovernanceAction,
+} from "../types/accessReview";
+
 
 type AccessReviewProps = {
   completedReviews: number;
@@ -19,6 +22,7 @@ type AccessReviewProps = {
   governanceActions: GovernanceAction[];
 };
 
+
 export default function AccessReview({
   completedReviews,
   pendingReviews,
@@ -27,342 +31,402 @@ export default function AccessReview({
   nextCampaign,
   governanceActions,
 }: AccessReviewProps) {
+  const totalReviews =
+    completedReviews +
+    pendingReviews +
+    overdueReviews;
+
+  const pendingRate =
+    totalReviews > 0
+      ? Math.round(
+          (pendingReviews /
+            totalReviews) *
+            100
+        )
+      : 0;
+
+  const overdueRate =
+    totalReviews > 0
+      ? Math.round(
+          (overdueReviews /
+            totalReviews) *
+            100
+        )
+      : 0;
+
+
   return (
-    <div className="rounded-3xl border border-slate-800 bg-slate-900/80 p-6 backdrop-blur-xl">
+    <section className="if-surface-elevated relative overflow-hidden p-6 sm:p-8">
 
-      {/* Header */}
-      <div className="mb-6 flex items-center justify-between">
+      {/* GOVERNANCE EDGE */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-teal-300/28 to-violet-300/18" />
 
-        <div>
-          <div className="flex items-center gap-2">
 
-            <ClipboardCheck
-              size={21}
-              className="text-cyan-400"
-            />
+      {/* AMBIENT GOVERNANCE */}
+      <div className="pointer-events-none absolute right-[-90px] top-[-90px] h-60 w-60 rounded-full bg-[rgba(72,215,198,0.03)] blur-[90px]" />
 
-            <h2 className="text-xl font-bold text-white">
-              Access Review
-            </h2>
 
-          </div>
+      <div className="relative z-10">
 
-          <p className="mt-1 text-sm text-slate-400">
-            Identity Governance Summary
-          </p>
-        </div>
+        {/* HEADER */}
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
 
-        <span className="rounded-full border border-cyan-500/20 bg-cyan-500/10 px-4 py-2 text-sm text-cyan-400">
-          Governance
-        </span>
+          <div className="flex items-start gap-3">
 
-      </div>
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-teal-300/12 bg-teal-300/[0.04] text-teal-200">
 
-      {/* KPI Cards */}
-      <div className="mb-7 grid grid-cols-2 gap-4 xl:grid-cols-4">
+              <ClipboardCheck
+                size={18}
+              />
 
-        {/* Completed */}
-        <div className="rounded-2xl border border-slate-800 bg-slate-950/60 p-4">
+            </div>
 
-          <div className="flex items-center justify-between">
 
-            <p className="text-xs uppercase tracking-wide text-slate-400">
-              Completed
-            </p>
+            <div>
 
-            <CheckCircle2
-              size={18}
-              className="text-emerald-400"
-            />
+              <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-[var(--if-teal-soft)]">
+                Governance Campaigns
+              </p>
+
+              <h2 className="if-heading mt-1 text-lg font-bold sm:text-xl">
+                Access Review
+              </h2>
+
+              <p className="mt-2 text-sm leading-6 text-[var(--if-text-muted)]">
+                Certification progress, overdue exposure and upcoming governance activity.
+              </p>
+
+            </div>
 
           </div>
 
-          <h3 className="mt-3 text-3xl font-bold text-emerald-400">
-            {completedReviews}
-          </h3>
 
-          <div className="mt-3 h-2 rounded-full bg-slate-800">
-
-            <div
-              className="h-2 rounded-full bg-emerald-400"
-              style={{
-                width: `${Math.min(completionRate, 100)}%`,
-              }}
-            />
-
-          </div>
-
-        </div>
-
-        {/* Pending */}
-        <div className="rounded-2xl border border-slate-800 bg-slate-950/60 p-4">
-
-          <div className="flex items-center justify-between">
-
-            <p className="text-xs uppercase tracking-wide text-slate-400">
-              Pending
-            </p>
-
-            <Clock3
-              size={18}
-              className="text-amber-400"
-            />
-
-          </div>
-
-          <h3 className="mt-3 text-3xl font-bold text-amber-400">
-            {pendingReviews}
-          </h3>
-
-          <div className="mt-3 h-2 rounded-full bg-slate-800">
-
-            <div
-              className="h-2 rounded-full bg-amber-400"
-              style={{ width: "35%" }}
-            />
-
-          </div>
-
-        </div>
-
-        {/* Overdue */}
-        <div className="rounded-2xl border border-slate-800 bg-slate-950/60 p-4">
-
-          <div className="flex items-center justify-between">
-
-            <p className="text-xs uppercase tracking-wide text-slate-400">
-              Overdue
-            </p>
-
-            <AlertTriangle
-              size={18}
-              className="text-red-400"
-            />
-
-          </div>
-
-          <h3 className="mt-3 text-3xl font-bold text-red-400">
-            {overdueReviews}
-          </h3>
-
-          <div className="mt-3 h-2 rounded-full bg-slate-800">
-
-            <div
-              className="h-2 rounded-full bg-red-400"
-              style={{ width: "20%" }}
-            />
-
-          </div>
-
-        </div>
-
-        {/* Completion Rate */}
-        <div className="rounded-2xl border border-slate-800 bg-slate-950/60 p-4">
-
-          <div className="flex items-center justify-between">
-
-            <p className="text-xs uppercase tracking-wide text-slate-400">
-              Completion Rate
-            </p>
-
-            <CheckCircle2
-              size={18}
-              className="text-cyan-400"
-            />
-
-          </div>
-
-          <h3 className="mt-3 text-3xl font-bold text-cyan-400">
-            {completionRate}%
-          </h3>
-
-          <div className="mt-3 h-2 rounded-full bg-slate-800">
-
-            <div
-              className="h-2 rounded-full bg-cyan-400"
-              style={{
-                width: `${Math.min(completionRate, 100)}%`,
-              }}
-            />
-
-          </div>
-
-        </div>
-
-      </div>
-
-      {/* Review Health */}
-      <div className="mb-6">
-
-        <div className="mb-3 flex items-center justify-between">
-
-          <div>
-            <p className="text-xs uppercase tracking-wide text-slate-400">
-              Review Health
-            </p>
-
-            <p className="mt-1 text-sm text-slate-500">
-              Current identity certification activity
-            </p>
-          </div>
-
-          <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-xs text-emerald-400">
-            Active
+          <span className="if-badge">
+            Identity Governance
           </span>
 
         </div>
 
-        <div className="rounded-2xl border border-slate-800 bg-slate-950/60 p-5">
 
-          {/* Completed */}
-          <div className="mb-5">
+        {/* SUMMARY SIGNALS */}
+        <div className="mt-7 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
 
-            <div className="mb-2 flex items-center justify-between">
-
-              <div className="flex items-center gap-2">
-
-                <CheckCircle2
-                  size={16}
-                  className="text-emerald-400"
-                />
-
-                <span className="text-sm text-slate-300">
-                  Completed reviews
-                </span>
-
-              </div>
-
-              <span className="text-sm font-semibold text-white">
-                {completedReviews}
-              </span>
-
-            </div>
-
-            <div className="h-2 rounded-full bg-slate-800">
-
-              <div
-                className="h-2 rounded-full bg-emerald-400"
-                style={{
-                  width: `${Math.min(completionRate, 100)}%`,
-                }}
+          <ReviewMetric
+            label="Completed"
+            value={completedReviews}
+            icon={
+              <CheckCircle2
+                size={16}
               />
+            }
+            tone="allow"
+          />
 
-            </div>
-
-          </div>
-
-          {/* Pending */}
-          <div className="mb-5">
-
-            <div className="mb-2 flex items-center justify-between">
-
-              <div className="flex items-center gap-2">
-
-                <Clock3
-                  size={16}
-                  className="text-amber-400"
-                />
-
-                <span className="text-sm text-slate-300">
-                  Pending reviews
-                </span>
-
-              </div>
-
-              <span className="text-sm font-semibold text-white">
-                {pendingReviews}
-              </span>
-
-            </div>
-
-            <div className="h-2 rounded-full bg-slate-800">
-
-              <div
-                className="h-2 rounded-full bg-amber-400"
-                style={{ width: "35%" }}
+          <ReviewMetric
+            label="Pending"
+            value={pendingReviews}
+            icon={
+              <Clock3
+                size={16}
               />
+            }
+            tone="step-up"
+          />
 
-            </div>
-
-          </div>
-
-          {/* Overdue */}
-          <div>
-
-            <div className="mb-2 flex items-center justify-between">
-
-              <div className="flex items-center gap-2">
-
-                <AlertTriangle
-                  size={16}
-                  className="text-red-400"
-                />
-
-                <span className="text-sm text-slate-300">
-                  Overdue reviews
-                </span>
-
-              </div>
-
-              <span className="text-sm font-semibold text-red-400">
-                {overdueReviews}
-              </span>
-
-            </div>
-
-            <div className="h-2 rounded-full bg-slate-800">
-
-              <div
-                className="h-2 rounded-full bg-red-400"
-                style={{ width: "20%" }}
+          <ReviewMetric
+            label="Overdue"
+            value={overdueReviews}
+            icon={
+              <AlertTriangle
+                size={16}
               />
+            }
+            tone="deny"
+          />
 
-            </div>
-
-          </div>
+          <ReviewMetric
+            label="Completion Rate"
+            value={`${completionRate}%`}
+            icon={
+              <ClipboardCheck
+                size={16}
+              />
+            }
+            tone="identity"
+          />
 
         </div>
 
-      </div>
 
-      {/* Next Campaign */}
-      <div className="mb-6">
+        {/* GOVERNANCE HEALTH */}
+        <div className="mt-7 rounded-2xl border border-[var(--if-border-soft)] bg-black/10 p-5">
 
-        <p className="mb-3 text-xs uppercase tracking-wide text-slate-400">
-          Next Campaign
-        </p>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 
-        <div className="flex items-center gap-4 rounded-2xl border border-cyan-500/20 bg-cyan-500/5 p-5">
+            <div>
 
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-cyan-500/20 bg-cyan-500/10">
+              <p className="text-[9px] font-semibold uppercase tracking-[0.14em] text-[var(--if-text-faint)]">
+                Certification Health
+              </p>
 
-            <CalendarClock
-              size={21}
-              className="text-cyan-400"
+              <p className="mt-1 text-sm font-semibold text-[var(--if-text-primary)]">
+                Current review campaign state
+              </p>
+
+            </div>
+
+
+            <div className="flex items-center gap-2">
+
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-300" />
+
+              <span className="text-[10px] font-medium text-emerald-200/80">
+                Campaign Active
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <div className="mt-6 space-y-5">
+
+            <ReviewProgress
+              label="Completed reviews"
+              value={completedReviews}
+              percent={completionRate}
+              tone="allow"
+            />
+
+            <ReviewProgress
+              label="Pending reviews"
+              value={pendingReviews}
+              percent={pendingRate}
+              tone="step-up"
+            />
+
+            <ReviewProgress
+              label="Overdue reviews"
+              value={overdueReviews}
+              percent={overdueRate}
+              tone="deny"
             />
 
           </div>
 
-          <div className="min-w-0">
+        </div>
 
-            <p className="text-sm font-semibold text-white">
-              Upcoming Access Review Campaign
-            </p>
 
-            <p className="mt-1 text-sm text-slate-400">
-              {nextCampaign}
-            </p>
+        {/* NEXT CAMPAIGN */}
+        <div className="mt-6">
+
+          <p className="text-[9px] font-semibold uppercase tracking-[0.14em] text-[var(--if-text-faint)]">
+            Next Campaign
+          </p>
+
+
+          <div className="mt-3 flex items-center gap-4 rounded-2xl border border-violet-300/12 bg-violet-300/[0.025] p-5">
+
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-violet-300/12 bg-violet-300/[0.04] text-violet-200">
+
+              <CalendarClock
+                size={19}
+              />
+
+            </div>
+
+
+            <div className="min-w-0">
+
+              <p className="text-sm font-semibold text-[var(--if-text-primary)]">
+                Upcoming Access Review Campaign
+              </p>
+
+              <p className="mt-1 text-sm text-[var(--if-text-muted)]">
+                {nextCampaign}
+              </p>
+
+            </div>
 
           </div>
 
         </div>
 
+
+        {/* GOVERNANCE ACTIONS */}
+        <div className="mt-6">
+
+          <div className="mb-3">
+
+            <p className="text-[9px] font-semibold uppercase tracking-[0.14em] text-[var(--if-text-faint)]">
+              Governance Actions
+            </p>
+
+            <p className="mt-1 text-sm font-semibold text-[var(--if-text-primary)]">
+              Items requiring certification attention
+            </p>
+
+          </div>
+
+
+          <GovernanceActions
+            actions={
+              governanceActions
+            }
+          />
+
+        </div>
+
       </div>
 
-      {/* Governance Actions */}
-      <GovernanceActions
-        actions={governanceActions}
-      />
+    </section>
+  );
+}
+
+
+function ReviewMetric({
+  label,
+  value,
+  icon,
+  tone,
+}: {
+  label: string;
+  value:
+    | number
+    | string;
+  icon:
+    React.ReactNode;
+  tone:
+    | "allow"
+    | "step-up"
+    | "deny"
+    | "identity";
+}) {
+  const classes =
+    tone === "allow"
+      ? "border-emerald-300/12 bg-emerald-300/[0.03] text-[var(--if-allow)]"
+      : tone === "step-up"
+      ? "border-amber-300/12 bg-amber-300/[0.03] text-[var(--if-step-up)]"
+      : tone === "deny"
+      ? "border-rose-300/12 bg-rose-300/[0.03] text-[var(--if-deny)]"
+      : "border-teal-300/12 bg-teal-300/[0.03] text-teal-200";
+
+
+  return (
+    <div className="rounded-2xl border border-[var(--if-border-soft)] bg-black/10 p-4">
+
+      <div className="flex items-start justify-between gap-3">
+
+        <div>
+
+          <p className="text-[9px] font-semibold uppercase tracking-[0.13em] text-[var(--if-text-faint)]">
+            {label}
+          </p>
+
+          <p className="mt-2 text-2xl font-bold tracking-[-0.035em] text-[var(--if-text-primary)]">
+            {value}
+          </p>
+
+        </div>
+
+
+        <div
+          className={[
+            "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border",
+            classes,
+          ].join(
+            " "
+          )}
+        >
+          {icon}
+        </div>
+
+      </div>
+
+    </div>
+  );
+}
+
+
+function ReviewProgress({
+  label,
+  value,
+  percent,
+  tone,
+}: {
+  label: string;
+  value: number;
+  percent: number;
+  tone:
+    | "allow"
+    | "step-up"
+    | "deny";
+}) {
+  const normalizedPercent =
+    Math.min(
+      Math.max(
+        percent,
+        0
+      ),
+      100
+    );
+
+
+  const barClass =
+    tone === "allow"
+      ? "bg-[var(--if-allow)]"
+      : tone === "step-up"
+      ? "bg-[var(--if-step-up)]"
+      : "bg-[var(--if-deny)]";
+
+
+  const valueClass =
+    tone === "allow"
+      ? "text-[var(--if-allow)]"
+      : tone === "step-up"
+      ? "text-[var(--if-step-up)]"
+      : "text-[var(--if-deny)]";
+
+
+  return (
+    <div>
+
+      <div className="mb-2 flex items-center justify-between gap-3">
+
+        <span className="text-xs font-medium text-[var(--if-text-secondary)]">
+          {label}
+        </span>
+
+        <span
+          className={[
+            "text-xs font-semibold",
+            valueClass,
+          ].join(
+            " "
+          )}
+        >
+          {value}
+        </span>
+
+      </div>
+
+
+      <div className="h-1.5 overflow-hidden rounded-full bg-white/[0.04]">
+
+        <div
+          className={[
+            "h-full rounded-full transition-all duration-700",
+            barClass,
+          ].join(
+            " "
+          )}
+          style={{
+            width:
+              `${normalizedPercent}%`,
+          }}
+        />
+
+      </div>
 
     </div>
   );
