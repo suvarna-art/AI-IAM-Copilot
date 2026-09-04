@@ -178,11 +178,5 @@ def root():
 @app.get("/health")
 def health():
     return {
-        "status": "Healthy",
-        "application": "AI-IAM Copilot",
-        "environment": ENVIRONMENT,
-        "is_production": IS_PRODUCTION,
-        "render_service_name": os.getenv("RENDER_SERVICE_NAME"),
-        "render_external_url": os.getenv("RENDER_EXTERNAL_URL"),
-        "render_service_id": os.getenv("RENDER_SERVICE_ID"),
+        "status": "healthy"
     }
