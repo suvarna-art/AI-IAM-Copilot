@@ -98,6 +98,44 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# =========================================================
+# SECURITY HEADERS
+# =========================================================
+
+@app.middleware("http")
+async def add_security_headers(request, call_next):
+    response = await call_next(request)
+
+    # Prevent MIME-type sniffing
+    response.headers["X-Content-Type-Options"] = "nosniff"
+
+    # Prevent the API from being embedded in frames
+    response.headers["X-Frame-Options"] = "DENY"
+
+    # Avoid leaking referrer information
+    response.headers["Referrer-Policy"] = "no-referrer"
+
+    # Disable unnecessary browser capabilities
+    response.headers["Permissions-Policy"] = (
+        "camera=(), microphone=(), geolocation=(), "
+        "payment=(), usb=()"
+    )
+
+    # API-focused CSP: this backend should not render browser content
+    response.headers["Content-Security-Policy"] = (
+        "default-src 'none'; "
+        "frame-ancestors 'none'; "
+        "base-uri 'none'; "
+        "form-action 'none'"
+    )
+
+    # HSTS should only be enabled in production over HTTPS
+    if IS_PRODUCTION:
+        response.headers["Strict-Transport-Security"] = (
+            "max-age=31536000; includeSubDomains"
+        )
+
+    return response
 
 # =========================================================
 # APPLICATION ROUTERS
