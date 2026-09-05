@@ -21,10 +21,8 @@ from app.services.permission_drift.exemptions_engine import (
     find_exact_rule,
     get_connection,
     get_exemption_by_id,
-    initialize_database,
     insert_exemption_record,
-    list_exemptions,
-    seed_demo_exemptions,
+    list_exemptions
 )
 
 from app.security.dependencies import require_admin
@@ -71,9 +69,6 @@ class CreateExemptionRequest(BaseModel):
 
 def get_current_findings() -> list[dict]:
     try:
-        initialize_database()
-        seed_demo_exemptions()
-
         raw_findings = (
             analyze_permission_drift()
         )
@@ -290,8 +285,6 @@ def create_policy_exemption(
     request: CreateExemptionRequest,
     current_user: dict = Depends(require_admin),
 ):
-    initialize_database()
-    seed_demo_exemptions()
 
     now = datetime.now(
         timezone.utc

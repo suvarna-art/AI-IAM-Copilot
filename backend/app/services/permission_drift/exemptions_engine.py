@@ -28,7 +28,10 @@ DATABASE_URL = os.getenv(
     "DATABASE_URL"
 )
 
-
+ENVIRONMENT = os.getenv(
+    "ENVIRONMENT",
+    "development",
+).lower()
 # =========================================================
 # DATABASE BACKEND
 # =========================================================
@@ -36,6 +39,16 @@ DATABASE_URL = os.getenv(
 def using_postgres() -> bool:
     return bool(DATABASE_URL)
 
+
+def validate_database_configuration() -> None:
+    if (
+        ENVIRONMENT == "production"
+        and not DATABASE_URL
+    ):
+        raise RuntimeError(
+            "DATABASE_URL must be configured in production. "
+            "SQLite fallback is disabled for production."
+        )
 
 def get_connection():
     """
@@ -48,7 +61,7 @@ def get_connection():
     This keeps development simple while ensuring durable
     governance state in production.
     """
-
+    validate_database_configuration()
     DATA_DIR.mkdir(
         parents=True,
         exist_ok=True,
@@ -511,9 +524,6 @@ def get_exemption_by_id(
 
 
 def list_exemptions() -> list[dict]:
-    initialize_database()
-    seed_demo_exemptions()
-
     connection = get_connection()
 
     try:
@@ -991,9 +1001,6 @@ def print_summary(
 
 
 def main() -> None:
-    initialize_database()
-
-    seed_demo_exemptions()
 
     raw_findings = (
         load_raw_findings()
