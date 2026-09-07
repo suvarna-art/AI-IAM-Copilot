@@ -1,4 +1,5 @@
 import os
+import logging
 
 from dotenv import load_dotenv
 from fastapi import FastAPI
@@ -28,7 +29,10 @@ from app.routers.permission_drift.permission_drift import (
 
 
 load_dotenv()
-
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(name)s %(message)s",
+)
 
 cors_origins = os.getenv(
     "BACKEND_CORS_ORIGINS",
@@ -104,6 +108,46 @@ app.add_middleware(
 
 @app.middleware("http")
 async def add_security_headers(request, call_next):
+    response = await call_next(request)
+
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Referrer-Policy"] = "no-referrer"
+
+    response.headers["Permissions-Policy"] = (
+        "camera=(), microphone=(), geolocation=(), "
+        "payment=(), usb=()"
+    )
+
+    if (
+        not IS_PRODUCTION
+        and request.url.path in {
+            "/docs",
+            "/redoc",
+        }
+    ):
+        response.headers["Content-Security-Policy"] = (
+            "default-src 'self' https:; "
+            "script-src 'self' 'unsafe-inline' https:; "
+            "style-src 'self' 'unsafe-inline' https:; "
+            "img-src 'self' data: https:; "
+            "font-src 'self' data: https:; "
+            "frame-ancestors 'none';"
+        )
+    else:
+        response.headers["Content-Security-Policy"] = (
+            "default-src 'none'; "
+            "frame-ancestors 'none'; "
+            "base-uri 'none'; "
+            "form-action 'none'"
+        )
+
+    if IS_PRODUCTION:
+        response.headers["Strict-Transport-Security"] = (
+            "max-age=31536000; includeSubDomains"
+        )
+
+    return response
     response = await call_next(request)
 
     # Prevent MIME-type sniffing

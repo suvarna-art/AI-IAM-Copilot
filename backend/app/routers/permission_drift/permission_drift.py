@@ -57,10 +57,6 @@ class CreateExemptionRequest(BaseModel):
     valid_from: datetime
     valid_until: datetime | None = None
 
-    created_by: str = Field(
-        min_length=3,
-        max_length=150,
-    )
 
 
 # =========================================================
@@ -398,7 +394,7 @@ def create_policy_exemption(
                 ),
 
                 created_by=
-                    request.created_by,
+                    current_user["username"],
 
                 status="ACTIVE",
 

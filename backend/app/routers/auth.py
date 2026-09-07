@@ -18,6 +18,9 @@ from app.security.auth import (
 )
 from app.security.dependencies import get_current_user
 from app.security.rate_limit import limiter
+from app.security.audit import (
+    write_security_audit_event,
+)
 
 from app.services.access_decision.models import (
     AccessDecisionType,
@@ -42,9 +45,8 @@ router = APIRouter(
 # - Failed attempts are maintained in process memory.
 # - Known browser fingerprints are maintained in process memory.
 #
-# This is intentionally lightweight for the portfolio implementation.
-# A production deployment would persist these signals in PostgreSQL,
-# Redis, SIEM, or an external identity provider.
+# A future enterprise implementation can persist these signals in
+# PostgreSQL, Redis, SIEM, or an external identity provider.
 # ------------------------------------------------------------------
 
 _failed_attempts: dict[str, int] = {}
@@ -53,6 +55,10 @@ _known_browser_fingerprints: set[str] = set()
 
 _auth_state_lock = Lock()
 
+
+# ------------------------------------------------------------------
+# ADMIN CREDENTIAL CONFIGURATION
+# ------------------------------------------------------------------
 
 def get_admin_credentials() -> tuple[str, str]:
     username = os.getenv(
@@ -72,15 +78,19 @@ def get_admin_credentials() -> tuple[str, str]:
     return username, password_hash
 
 
+# ------------------------------------------------------------------
+# BROWSER / SESSION CONTEXT
+# ------------------------------------------------------------------
+
 def build_browser_fingerprint(
     request: Request,
 ) -> str:
     """
-    Create a privacy-conscious browser fingerprint using
+    Create a privacy-conscious browser fingerprint from
     limited request metadata.
 
-    Raw browser metadata is not stored.
-    Only the SHA-256 digest is retained in memory.
+    Raw browser metadata is not persisted.
+    Only the SHA-256 digest is retained in process memory.
     """
 
     user_agent = request.headers.get(
@@ -108,13 +118,8 @@ def is_unusual_login_hour() -> bool:
     """
     Prototype unusual-hour policy.
 
-    Uses UTC because Render and most cloud runtimes
-    operate consistently in UTC.
-
-    00:00-05:59 UTC is treated as an unusual login window.
-
-    This threshold is policy-driven rather than an
-    assertion that the user is malicious.
+    UTC 00:00-05:59 is treated as an unusual login window.
+    This is a policy signal, not an assertion of malicious activity.
     """
 
     current_hour = datetime.now(
@@ -123,6 +128,10 @@ def is_unusual_login_hour() -> bool:
 
     return 0 <= current_hour < 6
 
+
+# ------------------------------------------------------------------
+# FAILED LOGIN STATE
+# ------------------------------------------------------------------
 
 def get_failed_attempt_count(
     username: str,
@@ -166,6 +175,10 @@ def clear_failed_attempts(
         )
 
 
+# ------------------------------------------------------------------
+# KNOWN BROWSER STATE
+# ------------------------------------------------------------------
+
 def is_known_browser(
     browser_fingerprint: str,
 ) -> bool:
@@ -184,6 +197,10 @@ def remember_browser(
             browser_fingerprint
         )
 
+
+# ------------------------------------------------------------------
+# LOGIN
+# ------------------------------------------------------------------
 
 @router.post("/login")
 @limiter.limit("5/minute")
@@ -239,12 +256,34 @@ def login(
     )
 
 
+    # --------------------------------------------------------------
+    # AUTHENTICATION FAILURE
+    # --------------------------------------------------------------
+
     if (
         not username_valid
         or not password_valid
     ):
-        record_failed_attempt(
-            form_data.username
+        failed_attempt_count = (
+            record_failed_attempt(
+                form_data.username
+            )
+        )
+
+        write_security_audit_event(
+            event_type="AUTH_FAILURE",
+            actor=form_data.username,
+            actor_role=None,
+            resource="IdentityForge AI",
+            action="LOGIN",
+            outcome="FAILURE",
+            reason="Invalid credentials.",
+            metadata={
+                "failed_attempts":
+                    failed_attempt_count,
+                "known_browser":
+                    known_browser,
+            },
         )
 
         raise HTTPException(
@@ -262,7 +301,7 @@ def login(
 
 
     # --------------------------------------------------------------
-    # Build adaptive authentication context from runtime signals.
+    # BUILD ADAPTIVE AUTHENTICATION CONTEXT
     # --------------------------------------------------------------
 
     session_context = SessionContext(
@@ -291,14 +330,34 @@ def login(
 
 
     # --------------------------------------------------------------
-    # Authentication succeeded, but application authorization can
-    # still independently DENY or require STEP_UP verification.
+    # ACCESS DENY
     # --------------------------------------------------------------
 
     if (
         decision.decision
         == AccessDecisionType.DENY
     ):
+        write_security_audit_event(
+            event_type="ACCESS_DENY",
+            actor=form_data.username,
+            actor_role=decision.role,
+            resource="IdentityForge AI",
+            action="LOGIN",
+            outcome="DENIED",
+            decision=decision.decision.value,
+            risk_level=decision.risk_level.value,
+            risk_score=decision.risk_score,
+            reason=decision.reason,
+            metadata={
+                "privileged":
+                    decision.privileged,
+                "failed_attempts":
+                    failed_attempts_before_login,
+                "known_browser":
+                    known_browser,
+            },
+        )
+
         raise HTTPException(
             status_code=(
                 status.HTTP_403_FORBIDDEN
@@ -315,10 +374,35 @@ def login(
         )
 
 
+    # --------------------------------------------------------------
+    # STEP-UP REQUIRED
+    # --------------------------------------------------------------
+
     if (
         decision.decision
         == AccessDecisionType.STEP_UP
     ):
+        write_security_audit_event(
+            event_type="ACCESS_STEP_UP",
+            actor=form_data.username,
+            actor_role=decision.role,
+            resource="IdentityForge AI",
+            action="LOGIN",
+            outcome="STEP_UP_REQUIRED",
+            decision=decision.decision.value,
+            risk_level=decision.risk_level.value,
+            risk_score=decision.risk_score,
+            reason=decision.reason,
+            metadata={
+                "privileged":
+                    decision.privileged,
+                "failed_attempts":
+                    failed_attempts_before_login,
+                "known_browser":
+                    known_browser,
+            },
+        )
+
         raise HTTPException(
             status_code=(
                 status.HTTP_403_FORBIDDEN
@@ -339,10 +423,10 @@ def login(
 
 
     # --------------------------------------------------------------
-    # Access approved.
+    # ACCESS APPROVED
     #
-    # Successful authentication clears accumulated failure signals
-    # and teaches the runtime that this browser has been seen before.
+    # Authentication succeeded and authorization allows an
+    # application session.
     # --------------------------------------------------------------
 
     clear_failed_attempts(
@@ -368,6 +452,34 @@ def login(
     access_token = create_access_token(
         subject=form_data.username,
         role=token_role,
+    )
+
+
+    # --------------------------------------------------------------
+    # SUCCESSFUL SESSION AUDIT
+    #
+    # The JWT itself is intentionally never written to audit logs.
+    # --------------------------------------------------------------
+
+    write_security_audit_event(
+        event_type="AUTH_SUCCESS",
+        actor=form_data.username,
+        actor_role=decision.role,
+        resource="IdentityForge AI",
+        action="LOGIN",
+        outcome="SUCCESS",
+        decision=decision.decision.value,
+        risk_level=decision.risk_level.value,
+        risk_score=decision.risk_score,
+        reason=decision.reason,
+        metadata={
+            "privileged":
+                decision.privileged,
+            "access_scope":
+                decision.access_scope,
+            "known_browser":
+                known_browser,
+        },
     )
 
 
@@ -416,6 +528,10 @@ def login(
         },
     }
 
+
+# ------------------------------------------------------------------
+# CURRENT AUTHENTICATED USER
+# ------------------------------------------------------------------
 
 @router.get("/me")
 def get_authenticated_user(
