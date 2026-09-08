@@ -1,10 +1,10 @@
 from datetime import datetime, timezone
-from fastapi import Depends 
 
 from fastapi import (
     APIRouter,
+    Depends,
     HTTPException,
-    Request, 
+    Request,
 )
 
 from pydantic import (
@@ -12,20 +12,29 @@ from pydantic import (
     Field,
 )
 
+from app.security.audit import (
+    write_security_audit_event,
+)
+from app.security.dependencies import (
+    require_admin,
+)
+from app.security.rate_limit import (
+    limiter,
+)
+
 from app.services.permission_drift.drift_engine import (
     analyze_permission_drift,
 )
-from app.security.rate_limit import limiter
+
 from app.services.permission_drift.exemptions_engine import (
     apply_exemptions,
     find_exact_rule,
     get_connection,
     get_exemption_by_id,
     insert_exemption_record,
-    list_exemptions
+    list_exemptions,
 )
 
-from app.security.dependencies import require_admin
 
 router = APIRouter(
     prefix="/permission-drift",
@@ -56,7 +65,6 @@ class CreateExemptionRequest(BaseModel):
 
     valid_from: datetime
     valid_until: datetime | None = None
-
 
 
 # =========================================================
@@ -279,9 +287,10 @@ def get_policy_exemptions():
 def create_policy_exemption(
     http_request: Request,
     request: CreateExemptionRequest,
-    current_user: dict = Depends(require_admin),
+    current_user: dict = Depends(
+        require_admin
+    ),
 ):
-
     now = datetime.now(
         timezone.utc
     )
@@ -434,9 +443,71 @@ def create_policy_exemption(
                 value,
                 datetime,
             ):
-                exemption[field] = (
-                    value.isoformat()
-                )
+                exemption[
+                    field
+                ] = value.isoformat()
+
+        write_security_audit_event(
+            event_type=(
+                "GOVERNANCE_EXEMPTION_CREATED"
+            ),
+            actor=(
+                current_user[
+                    "username"
+                ]
+            ),
+            actor_role=(
+                current_user[
+                    "role"
+                ]
+            ),
+            resource=(
+                "Permission Drift"
+            ),
+            action=(
+                "CREATE_EXEMPTION"
+            ),
+            outcome=(
+                "SUCCESS"
+            ),
+            reason=(
+                "Governance exemption created."
+            ),
+            metadata={
+                "exemption_id":
+                    exemption.get(
+                        "id",
+                        exemption_id,
+                    ),
+
+                "exemption_type":
+                    exemption.get(
+                        "exemption_type"
+                    ),
+
+                "scope": {
+                    "user_id":
+                        exemption.get(
+                            "user_id"
+                        ),
+
+                    "account_type":
+                        exemption.get(
+                            "account_type"
+                        ),
+
+                    "permission":
+                        exemption.get(
+                            "permission"
+                        ),
+                },
+
+                "valid_until":
+                    exemption.get(
+                        "valid_until"
+                    ),
+            },
+        )
 
         return {
             "message":
