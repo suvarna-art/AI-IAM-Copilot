@@ -149,7 +149,58 @@ def write_security_audit_event(
         )
     )
 
+    try:
+        persist_security_audit_event(
+            event
+        )
 
-    persist_security_audit_event(
-        event
-    )
+    except Exception as exc:
+        audit_logger.error(
+            json.dumps(
+                {
+                    "timestamp":
+                        datetime.now(
+                            timezone.utc
+                        ).isoformat(),
+
+                    "event_type":
+                        "AUDIT_PERSISTENCE_FAILURE",
+
+                    "actor":
+                        event.get(
+                            "actor"
+                        ),
+
+                    "resource":
+                        event.get(
+                            "resource"
+                        ),
+
+                    "action":
+                        event.get(
+                            "action"
+                        ),
+
+                    "outcome":
+                        "FAILURE",
+
+                    "reason":
+                        "Security audit event "
+                        "could not be persisted.",
+
+                    "metadata": {
+                        "original_event_type":
+                            event.get(
+                                "event_type"
+                            ),
+
+                        "exception_type":
+                            type(
+                                exc
+                            ).__name__,
+                    },
+                },
+                separators=(",", ":"),
+                default=str,
+            )
+        )
