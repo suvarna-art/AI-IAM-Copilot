@@ -82,27 +82,12 @@ def get_admin_credentials() -> tuple[str, str]:
         "ADMIN_PASSWORD_HASH"
     )
 
-    logger.warning(
-        "AUTH_RUNTIME_CHECK "
-        "admin_username_present=%s "
-        "admin_password_hash_present=%s",
-        bool(username),
-        bool(password_hash),
-    )
-
     if not username or not password_hash:
-        logger.error(
-            "AUTH_RUNTIME_CONFIG_MISSING"
-        )
 
         raise RuntimeError(
             "Admin authentication environment variables "
             "are not configured."
         )
-
-    logger.warning(
-        "AUTH_RUNTIME_CONFIG_OK"
-    )
 
     return username, password_hash
 

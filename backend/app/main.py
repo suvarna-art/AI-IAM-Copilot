@@ -20,11 +20,6 @@ logging.basicConfig(
     ),
 )
 
-logger = logging.getLogger(
-    "identityforge.startup"
-)
-
-
 ENVIRONMENT = os.getenv(
     "ENVIRONMENT",
     "development",
@@ -33,44 +28,6 @@ ENVIRONMENT = os.getenv(
 IS_PRODUCTION = (
     ENVIRONMENT == "production"
 )
-
-
-logger.warning(
-    "STARTUP_CONFIG_CHECK "
-    "environment=%s "
-    "admin_username_present=%s "
-    "admin_password_hash_present=%s "
-    "jwt_secret_key_present=%s "
-    "database_url_present=%s "
-    "cors_origins_present=%s",
-    ENVIRONMENT,
-    bool(
-        os.getenv(
-            "ADMIN_USERNAME"
-        )
-    ),
-    bool(
-        os.getenv(
-            "ADMIN_PASSWORD_HASH"
-        )
-    ),
-    bool(
-        os.getenv(
-            "JWT_SECRET_KEY"
-        )
-    ),
-    bool(
-        os.getenv(
-            "DATABASE_URL"
-        )
-    ),
-    bool(
-        os.getenv(
-            "BACKEND_CORS_ORIGINS"
-        )
-    ),
-)
-
 
 # =========================================================
 # FRAMEWORK IMPORTS
