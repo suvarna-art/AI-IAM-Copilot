@@ -69,6 +69,24 @@ def get_admin_credentials() -> tuple[str, str]:
         "ADMIN_PASSWORD_HASH"
     )
 
+    print(
+        "AUTH CONFIG CHECK:",
+        {
+            "ADMIN_USERNAME_PRESENT":
+                bool(username),
+
+            "ADMIN_PASSWORD_HASH_PRESENT":
+                bool(password_hash),
+
+            "JWT_SECRET_KEY_PRESENT":
+                bool(
+                    os.getenv(
+                        "JWT_SECRET_KEY"
+                    )
+                ),
+        },
+    )
+
     if not username or not password_hash:
         raise RuntimeError(
             "Admin authentication environment variables "
