@@ -1,5 +1,6 @@
 import hashlib
 import os
+import logging
 from datetime import datetime, timezone
 from threading import Lock
 
@@ -31,6 +32,9 @@ from app.services.access_decision.policy_engine import (
     evaluate_access_decision,
 )
 
+logger = logging.getLogger(
+    "identityforge.auth"
+)
 
 router = APIRouter(
     prefix="/auth",
@@ -69,22 +73,18 @@ def get_admin_credentials() -> tuple[str, str]:
         "ADMIN_PASSWORD_HASH"
     )
 
-    print(
-        "AUTH CONFIG CHECK:",
-        {
-            "ADMIN_USERNAME_PRESENT":
-                bool(username),
+    jwt_secret = os.getenv(
+        "JWT_SECRET_KEY"
+    )
 
-            "ADMIN_PASSWORD_HASH_PRESENT":
-                bool(password_hash),
-
-            "JWT_SECRET_KEY_PRESENT":
-                bool(
-                    os.getenv(
-                        "JWT_SECRET_KEY"
-                    )
-                ),
-        },
+    logger.warning(
+        "AUTH_CONFIG_CHECK "
+        "admin_username_present=%s "
+        "admin_password_hash_present=%s "
+        "jwt_secret_key_present=%s",
+        bool(username),
+        bool(password_hash),
+        bool(jwt_secret),
     )
 
     if not username or not password_hash:
@@ -94,7 +94,6 @@ def get_admin_credentials() -> tuple[str, str]:
         )
 
     return username, password_hash
-
 
 # ------------------------------------------------------------------
 # BROWSER / SESSION CONTEXT
