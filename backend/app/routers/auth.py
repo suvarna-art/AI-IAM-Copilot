@@ -32,13 +32,13 @@ from app.services.access_decision.policy_engine import (
     evaluate_access_decision,
 )
 
-logger = logging.getLogger(
-    "identityforge.auth"
-)
-
 router = APIRouter(
     prefix="/auth",
     tags=["Authentication"],
+)
+
+logger = logging.getLogger(
+    "identityforge.auth"
 )
 
 
@@ -73,18 +73,12 @@ def get_admin_credentials() -> tuple[str, str]:
         "ADMIN_PASSWORD_HASH"
     )
 
-    jwt_secret = os.getenv(
-        "JWT_SECRET_KEY"
-    )
-
     logger.warning(
-        "AUTH_CONFIG_CHECK "
+        "AUTH_RUNTIME_CHECK "
         "admin_username_present=%s "
-        "admin_password_hash_present=%s "
-        "jwt_secret_key_present=%s",
+        "admin_password_hash_present=%s",
         bool(username),
         bool(password_hash),
-        bool(jwt_secret),
     )
 
     if not username or not password_hash:
