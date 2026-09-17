@@ -1,6 +1,7 @@
 import hashlib
-import os
 import logging
+import os
+
 from datetime import datetime, timezone
 from threading import Lock
 
@@ -11,16 +12,26 @@ from fastapi import (
     Request,
     status,
 )
-from fastapi.security import OAuth2PasswordRequestForm
+
+from fastapi.security import (
+    OAuth2PasswordRequestForm,
+)
 
 from app.security.auth import (
     create_access_token,
     verify_password,
 )
-from app.security.dependencies import get_current_user
-from app.security.rate_limit import limiter
+
 from app.security.audit import (
     write_security_audit_event,
+)
+
+from app.security.dependencies import (
+    get_current_user,
+)
+
+from app.security.rate_limit import (
+    limiter,
 )
 
 from app.services.access_decision.models import (
@@ -32,6 +43,11 @@ from app.services.access_decision.policy_engine import (
     evaluate_access_decision,
 )
 
+
+# =========================================================
+# ROUTER / LOGGING
+# =========================================================
+
 router = APIRouter(
     prefix="/auth",
     tags=["Authentication"],
@@ -42,16 +58,9 @@ logger = logging.getLogger(
 )
 
 
-# ------------------------------------------------------------------
-# Adaptive authentication runtime state
-#
-# Prototype implementation:
-# - Failed attempts are maintained in process memory.
-# - Known browser fingerprints are maintained in process memory.
-#
-# A future enterprise implementation can persist these signals in
-# PostgreSQL, Redis, SIEM, or an external identity provider.
-# ------------------------------------------------------------------
+# =========================================================
+# ADAPTIVE AUTHENTICATION RUNTIME STATE
+# =========================================================
 
 _failed_attempts: dict[str, int] = {}
 
@@ -60,9 +69,9 @@ _known_browser_fingerprints: set[str] = set()
 _auth_state_lock = Lock()
 
 
-# ------------------------------------------------------------------
+# =========================================================
 # ADMIN CREDENTIAL CONFIGURATION
-# ------------------------------------------------------------------
+# =========================================================
 
 def get_admin_credentials() -> tuple[str, str]:
     username = os.getenv(
@@ -82,26 +91,34 @@ def get_admin_credentials() -> tuple[str, str]:
     )
 
     if not username or not password_hash:
+        logger.error(
+            "AUTH_RUNTIME_CONFIG_MISSING"
+        )
+
         raise RuntimeError(
             "Admin authentication environment variables "
             "are not configured."
         )
 
+    logger.warning(
+        "AUTH_RUNTIME_CONFIG_OK"
+    )
+
     return username, password_hash
 
-# ------------------------------------------------------------------
+
+# =========================================================
 # BROWSER / SESSION CONTEXT
-# ------------------------------------------------------------------
+# =========================================================
 
 def build_browser_fingerprint(
     request: Request,
 ) -> str:
     """
-    Create a privacy-conscious browser fingerprint from
-    limited request metadata.
+    Build a privacy-conscious browser fingerprint.
 
+    Only limited request metadata is used.
     Raw browser metadata is not persisted.
-    Only the SHA-256 digest is retained in process memory.
     """
 
     user_agent = request.headers.get(
@@ -129,20 +146,24 @@ def is_unusual_login_hour() -> bool:
     """
     Prototype unusual-hour policy.
 
-    UTC 00:00-05:59 is treated as an unusual login window.
-    This is a policy signal, not an assertion of malicious activity.
+    UTC 00:00-05:59 is treated as an unusual
+    authentication window.
     """
 
     current_hour = datetime.now(
         timezone.utc
     ).hour
 
-    return 0 <= current_hour < 6
+    return (
+        0
+        <= current_hour
+        < 6
+    )
 
 
-# ------------------------------------------------------------------
+# =========================================================
 # FAILED LOGIN STATE
-# ------------------------------------------------------------------
+# =========================================================
 
 def get_failed_attempt_count(
     username: str,
@@ -186,9 +207,9 @@ def clear_failed_attempts(
         )
 
 
-# ------------------------------------------------------------------
+# =========================================================
 # KNOWN BROWSER STATE
-# ------------------------------------------------------------------
+# =========================================================
 
 def is_known_browser(
     browser_fingerprint: str,
@@ -209,9 +230,9 @@ def remember_browser(
         )
 
 
-# ------------------------------------------------------------------
+# =========================================================
 # LOGIN
-# ------------------------------------------------------------------
+# =========================================================
 
 @router.post("/login")
 @limiter.limit("5/minute")
@@ -219,6 +240,10 @@ def login(
     request: Request,
     form_data: OAuth2PasswordRequestForm = Depends(),
 ):
+    # -----------------------------------------------------
+    # LOAD SERVER-SIDE ADMIN CONFIGURATION
+    # -----------------------------------------------------
+
     try:
         admin_username, admin_password_hash = (
             get_admin_credentials()
@@ -236,12 +261,15 @@ def login(
         ) from exc
 
 
+    # -----------------------------------------------------
+    # SESSION CONTEXT
+    # -----------------------------------------------------
+
     browser_fingerprint = (
         build_browser_fingerprint(
             request
         )
     )
-
 
     failed_attempts_before_login = (
         get_failed_attempt_count(
@@ -249,17 +277,21 @@ def login(
         )
     )
 
-
-    known_browser = is_known_browser(
-        browser_fingerprint
+    known_browser = (
+        is_known_browser(
+            browser_fingerprint
+        )
     )
 
+
+    # -----------------------------------------------------
+    # CREDENTIAL VALIDATION
+    # -----------------------------------------------------
 
     username_valid = (
         form_data.username
         == admin_username
     )
-
 
     password_valid = verify_password(
         form_data.password,
@@ -267,9 +299,9 @@ def login(
     )
 
 
-    # --------------------------------------------------------------
+    # -----------------------------------------------------
     # AUTHENTICATION FAILURE
-    # --------------------------------------------------------------
+    # -----------------------------------------------------
 
     if (
         not username_valid
@@ -292,6 +324,7 @@ def login(
             metadata={
                 "failed_attempts":
                     failed_attempt_count,
+
                 "known_browser":
                     known_browser,
             },
@@ -311,9 +344,9 @@ def login(
         )
 
 
-    # --------------------------------------------------------------
+    # -----------------------------------------------------
     # BUILD ADAPTIVE AUTHENTICATION CONTEXT
-    # --------------------------------------------------------------
+    # -----------------------------------------------------
 
     session_context = SessionContext(
         new_browser=(
@@ -334,15 +367,19 @@ def login(
     )
 
 
+    # -----------------------------------------------------
+    # ACCESS DECISION ENGINE
+    # -----------------------------------------------------
+
     decision = evaluate_access_decision(
         username=form_data.username,
         context=session_context,
     )
 
 
-    # --------------------------------------------------------------
+    # -----------------------------------------------------
     # ACCESS DENY
-    # --------------------------------------------------------------
+    # -----------------------------------------------------
 
     if (
         decision.decision
@@ -355,15 +392,25 @@ def login(
             resource="IdentityForge AI",
             action="LOGIN",
             outcome="DENIED",
-            decision=decision.decision.value,
-            risk_level=decision.risk_level.value,
-            risk_score=decision.risk_score,
-            reason=decision.reason,
+            decision=(
+                decision.decision.value
+            ),
+            risk_level=(
+                decision.risk_level.value
+            ),
+            risk_score=(
+                decision.risk_score
+            ),
+            reason=(
+                decision.reason
+            ),
             metadata={
                 "privileged":
                     decision.privileged,
+
                 "failed_attempts":
                     failed_attempts_before_login,
+
                 "known_browser":
                     known_browser,
             },
@@ -385,9 +432,9 @@ def login(
         )
 
 
-    # --------------------------------------------------------------
+    # -----------------------------------------------------
     # STEP-UP REQUIRED
-    # --------------------------------------------------------------
+    # -----------------------------------------------------
 
     if (
         decision.decision
@@ -400,15 +447,25 @@ def login(
             resource="IdentityForge AI",
             action="LOGIN",
             outcome="STEP_UP_REQUIRED",
-            decision=decision.decision.value,
-            risk_level=decision.risk_level.value,
-            risk_score=decision.risk_score,
-            reason=decision.reason,
+            decision=(
+                decision.decision.value
+            ),
+            risk_level=(
+                decision.risk_level.value
+            ),
+            risk_score=(
+                decision.risk_score
+            ),
+            reason=(
+                decision.reason
+            ),
             metadata={
                 "privileged":
                     decision.privileged,
+
                 "failed_attempts":
                     failed_attempts_before_login,
+
                 "known_browser":
                     known_browser,
             },
@@ -433,22 +490,22 @@ def login(
         )
 
 
-    # --------------------------------------------------------------
+    # -----------------------------------------------------
     # ACCESS APPROVED
-    #
-    # Authentication succeeded and authorization allows an
-    # application session.
-    # --------------------------------------------------------------
+    # -----------------------------------------------------
 
     clear_failed_attempts(
         form_data.username
     )
 
-
     remember_browser(
         browser_fingerprint
     )
 
+
+    # -----------------------------------------------------
+    # TOKEN ROLE
+    # -----------------------------------------------------
 
     token_role = (
         "admin"
@@ -460,17 +517,19 @@ def login(
     )
 
 
+    # -----------------------------------------------------
+    # CREATE SESSION TOKEN
+    # -----------------------------------------------------
+
     access_token = create_access_token(
         subject=form_data.username,
         role=token_role,
     )
 
 
-    # --------------------------------------------------------------
-    # SUCCESSFUL SESSION AUDIT
-    #
-    # The JWT itself is intentionally never written to audit logs.
-    # --------------------------------------------------------------
+    # -----------------------------------------------------
+    # SUCCESSFUL AUTHENTICATION AUDIT
+    # -----------------------------------------------------
 
     write_security_audit_event(
         event_type="AUTH_SUCCESS",
@@ -479,20 +538,34 @@ def login(
         resource="IdentityForge AI",
         action="LOGIN",
         outcome="SUCCESS",
-        decision=decision.decision.value,
-        risk_level=decision.risk_level.value,
-        risk_score=decision.risk_score,
-        reason=decision.reason,
+        decision=(
+            decision.decision.value
+        ),
+        risk_level=(
+            decision.risk_level.value
+        ),
+        risk_score=(
+            decision.risk_score
+        ),
+        reason=(
+            decision.reason
+        ),
         metadata={
             "privileged":
                 decision.privileged,
+
             "access_scope":
                 decision.access_scope,
+
             "known_browser":
                 known_browser,
         },
     )
 
+
+    # -----------------------------------------------------
+    # RESPONSE
+    # -----------------------------------------------------
 
     return {
         "access_token":
@@ -540,9 +613,9 @@ def login(
     }
 
 
-# ------------------------------------------------------------------
+# =========================================================
 # CURRENT AUTHENTICATED USER
-# ------------------------------------------------------------------
+# =========================================================
 
 @router.get("/me")
 def get_authenticated_user(
